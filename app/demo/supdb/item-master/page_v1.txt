@@ -1,0 +1,169 @@
+import { pool } from "@/lib/db";
+import Link from "next/link";
+
+
+type SearchParams = {
+  q?: string;
+  page?: string;
+  limit?: string;
+};
+
+export const dynamic = "force-dynamic"; // demo: always fresh
+
+function toInt(v: string | undefined, def: number, min: number, max: number) {
+  const n = Number.parseInt(v ?? "", 10);
+  if (!Number.isFinite(n)) return def;
+  return Math.min(max, Math.max(min, n));
+}
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const sp = await searchParams;
+  const q = (sp.q ?? "").trim();
+  const limit = toInt(sp.limit, 100, 1, 1000);
+  const page = toInt(sp.page, 1, 1, 100000);
+  const offset = (page - 1) * limit;
+
+  // NOTE: "SELECT *" is fine for a demo; later you can curate columns.
+  // Filtering: quick demo approach uses row-to-text; you can replace with specific columns.
+  const where = q ? `WHERE CAST(im AS text) ILIKE $1` : "";
+  const params: any[] = [];
+  if (q) params.push(`%${q}%`);
+  params.push(limit, offset);
+
+  const sql = `
+    SELECT im.*
+    FROM cdm.item_master im
+    ${where}
+    ORDER BY 1
+    LIMIT $${q ? 2 : 1}
+    OFFSET $${q ? 3 : 2}
+  `;
+
+  const { rows } = await pool.query(sql, params);
+  const columns = rows[0] ? Object.keys(rows[0]) : [];
+
+  const hasPrev = page > 1;
+  const hasNext = rows.length === limit; // demo logic
+;
+
+  return (
+    <main style={{ padding: 16, fontFamily: "Arial, sans-serif" }}>
+      <h2>Supdb (Supportability db) — cdm.item_master</h2>
+
+      <form method="GET" style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        <input
+          name="q"
+          defaultValue={q}
+          placeholder="search…"
+          style={{ padding: 8, minWidth: 280 }}
+        />
+        <input
+          name="limit"
+          defaultValue={String(limit)}
+          style={{ padding: 8, width: 100 }}
+        />
+        <input
+          name="page"
+          defaultValue={String(page)}
+          style={{ padding: 8, width: 100 }}
+        />
+        <button type="submit" style={{ padding: "8px 12px" }}>
+          Go
+        </button>
+      </form>
+
+      <div style={{ marginBottom: 8, color: "#666", fontSize: 12 }}>
+        Showing {rows.length} rows (page {page}, limit {limit})
+      </div>
+
+		{rows.length === 0 ? (
+        <p>No rows found.</p>
+		) : (
+        <div style={{ overflowX: "auto" }}>
+          <table
+            style={{
+              borderCollapse: "collapse",
+              width: "100%",
+              fontSize: 13,
+            }}
+          >
+            <thead>
+              <tr>
+                {columns.map((c) => (
+                  <th
+                    key={c}
+                    style={{
+                      border: "1px solid #ddd",
+                      background: "#f5f5f5",
+                      padding: "6px 8px",
+                      textAlign: "left",
+                      position: "sticky",
+                      top: 0,
+                    }}
+                  >
+                    {c}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r: Record<string, unknown>, i: number) => (
+                <tr key={i}>
+                  {columns.map((c: string) => (
+                    <td key={c}>
+                      {String(r[c] ?? "")}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody> 
+          </table>
+        </div>
+      )}
+
+
+      <div
+        style={{
+          marginTop: 16,
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
+        {hasPrev ? (
+          <Link
+            href={{
+              pathname: "/demo/supdb/item-master",
+              query: { q, limit, page: page - 1 },
+            }}
+            style={{ textDecoration: "underline" }}
+          >
+            ← Prev
+          </Link>
+        ) : (
+          <span style={{ color: "#999" }}>← Prev</span>
+        )}
+
+        <span style={{ fontWeight: 600 }}>Page {page}</span>
+
+        {hasNext ? (
+          <Link
+            href={{
+              pathname: "/demo/supdb/item-master",
+              query: { q, limit, page: page + 1 },
+            }}
+            style={{ textDecoration: "underline" }}
+          >
+            Next →
+          </Link>
+        ) : (
+          <span style={{ color: "#999" }}>Next →</span>
+        )}
+      </div>
+    </main>
+  );
+}

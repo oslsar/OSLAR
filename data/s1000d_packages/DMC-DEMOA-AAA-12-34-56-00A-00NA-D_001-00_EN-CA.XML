@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dmodule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <identAndStatusSection>
+    <dmAddress>
+      <dmIdent>
+        <dmCode
+          modelIdentCode="DEMOA"
+          systemDiffCode="AAA"
+          systemCode="12"
+          subSystemCode="34"
+          subSubSystemCode="56"
+          assyCode="00"
+          disassyCode="00"
+          disassyCodeVariant="A"
+          infoCode="00N"
+          infoCodeVariant="A"
+          itemLocationCode="D"/>
+        <issueInfo issueNumber="001" inWork="00"/>
+        <language languageIsoCode="en" countryIsoCode="CA"/>
+      </dmIdent>
+      <dmAddressItems>
+        <issueDate year="2026" month="03" day="30"/>
+        <dmTitle>
+          <techName>Bicycle chain</techName>
+          <infoName>Illustrated parts figure references</infoName>
+        </dmTitle>
+      </dmAddressItems>
+    </dmAddress>
+    <dmStatus issueType="new">
+      <security securityClassification="01"/>
+      <responsiblePartnerCompany enterpriseCode="OSLAR"/>
+      <originator enterpriseCode="OSLAR"/>
+    </dmStatus>
+  </identAndStatusSection>
+  <content>
+    <description>
+      <para>Refer to ICN-DEMOA-CHAIN-001 for the chain assembly illustration.</para>
+      <figure id="fig-chain-01">
+        <title>Chain assembly figure</title>
+        <graphic infoEntityIdent="ICN-DEMOA-CHAIN-001"/>
+      </figure>
+    </description>
+  </content>
+</dmodule>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<comment xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <identAndStatusSection>
+    <commentAddress>
+      <commentIdent>
+        <commentCode senderIdent="OSLAR" yearOfDataIssue="2026" seqNumber="0001" commentType="q"/>
+        <language languageIsoCode="en" countryIsoCode="CA"/>
+      </commentIdent>
+    </commentAddress>
+  </identAndStatusSection>
+  <content>
+    <remarks>
+      <simplePara>Demo comment file included to exercise unknown or comment document handling.</simplePara>
+    </remarks>
+  </content>
+</comment>

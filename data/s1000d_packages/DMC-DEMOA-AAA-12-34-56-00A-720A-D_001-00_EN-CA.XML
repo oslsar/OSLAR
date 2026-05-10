@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dmodule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <identAndStatusSection>
+    <dmAddress>
+      <dmIdent>
+        <dmCode
+          modelIdentCode="DEMOA"
+          systemDiffCode="AAA"
+          systemCode="12"
+          subSystemCode="34"
+          subSubSystemCode="56"
+          assyCode="00"
+          disassyCode="00"
+          disassyCodeVariant="A"
+          infoCode="720"
+          infoCodeVariant="A"
+          itemLocationCode="D"/>
+        <issueInfo issueNumber="001" inWork="00"/>
+        <language languageIsoCode="en" countryIsoCode="CA"/>
+      </dmIdent>
+      <dmAddressItems>
+        <issueDate year="2026" month="03" day="30"/>
+        <dmTitle>
+          <techName>Bicycle chain</techName>
+          <infoName>Removal and installation</infoName>
+        </dmTitle>
+      </dmAddressItems>
+    </dmAddress>
+    <dmStatus issueType="new">
+      <security securityClassification="01"/>
+      <responsiblePartnerCompany enterpriseCode="OSLAR"/>
+      <originator enterpriseCode="OSLAR"/>
+      <brexDmRef>
+        <dmRef>
+          <dmRefIdent>
+            <dmCode
+              modelIdentCode="DEMOA"
+              systemDiffCode="AAA"
+              systemCode="00"
+              subSystemCode="00"
+              subSubSystemCode="00"
+              assyCode="00"
+              disassyCode="00"
+              disassyCodeVariant="A"
+              infoCode="022"
+              infoCodeVariant="A"
+              itemLocationCode="D"/>
+            <issueInfo issueNumber="001" inWork="00"/>
+          </dmRefIdent>
+        </dmRef>
+      </brexDmRef>
+    </dmStatus>
+  </identAndStatusSection>
+  <content>
+    <procedure>
+      <preliminaryRqmts>
+        <reqSupportEquips>
+          <supportEquipDescrGroup>
+            <supportEquipDescr>
+              <name>Chain breaker tool</name>
+            </supportEquipDescr>
+          </supportEquipDescrGroup>
+        </reqSupportEquips>
+        <reqSupplies>
+          <supplyDescrGroup>
+            <supplyDescr>
+              <name>Clean cloth</name>
+            </supplyDescr>
+            <supplyDescr>
+              <name>Chain lubricant</name>
+            </supplyDescr>
+          </supplyDescrGroup>
+        </reqSupplies>
+        <reqPersons>
+          <person personCategoryCode="maintainer" numRequired="1"/>
+        </reqPersons>
+      </preliminaryRqmts>
+      <mainProcedure>
+        <proceduralStep>
+          <para>Put the bicycle on a work stand.</para>
+        </proceduralStep>
+        <proceduralStep>
+          <para>Use the chain breaker tool to disconnect the chain.</para>
+        </proceduralStep>
+        <proceduralStep>
+          <para>Remove the chain from the front chainring and rear sprocket.</para>
+        </proceduralStep>
+        <proceduralStep>
+          <para>Install the replacement chain and connect the master link.</para>
+        </proceduralStep>
+        <proceduralStep>
+          <para>Lubricate the chain and make sure the chain moves freely.</para>
+        </proceduralStep>
+      </mainProcedure>
+      <closeRqmts>
+        <reqCondGroup>
+          <reqCond>
+            <para>Chain installed and lubricated.</para>
+          </reqCond>
+        </reqCondGroup>
+      </closeRqmts>
+    </procedure>
+  </content>
+</dmodule>

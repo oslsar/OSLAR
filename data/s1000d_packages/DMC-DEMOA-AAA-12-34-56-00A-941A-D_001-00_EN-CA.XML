@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dmodule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <identAndStatusSection>
+    <dmAddress>
+      <dmIdent>
+        <dmCode
+          modelIdentCode="DEMOA"
+          systemDiffCode="AAA"
+          systemCode="12"
+          subSystemCode="34"
+          subSubSystemCode="56"
+          assyCode="00"
+          disassyCode="00"
+          disassyCodeVariant="A"
+          infoCode="941"
+          infoCodeVariant="A"
+          itemLocationCode="D"/>
+        <issueInfo issueNumber="001" inWork="00"/>
+        <language languageIsoCode="en" countryIsoCode="CA"/>
+      </dmIdent>
+      <dmAddressItems>
+        <issueDate year="2026" month="03" day="30"/>
+        <dmTitle>
+          <techName>Bicycle chain</techName>
+          <infoName>Parts data</infoName>
+        </dmTitle>
+      </dmAddressItems>
+    </dmAddress>
+    <dmStatus issueType="new">
+      <security securityClassification="01"/>
+      <responsiblePartnerCompany enterpriseCode="OSLAR"/>
+      <originator enterpriseCode="OSLAR"/>
+    </dmStatus>
+  </identAndStatusSection>
+  <content>
+    <illustratedPartsCatalog>
+      <catalogSeqNumber assyCode="00" figureNumber="01" figureNumberVariant="A" item="001">
+        <itemSeqNumber itemSeqNumberValue="001">
+          <quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+          <partRef partNumberValue="BC-CHAIN-001"/>
+          <descrForPart>Bicycle chain assembly</descrForPart>
+          <usableOnCodeEquip>BASE</usableOnCodeEquip>
+        </itemSeqNumber>
+        <itemSeqNumber itemSeqNumberValue="002">
+          <quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+          <partRef partNumberValue="BC-LINK-001"/>
+          <descrForPart>Master link</descrForPart>
+          <usableOnCodeEquip>BASE</usableOnCodeEquip>
+        </itemSeqNumber>
+      </catalogSeqNumber>
+    </illustratedPartsCatalog>
+  </content>
+</dmodule>

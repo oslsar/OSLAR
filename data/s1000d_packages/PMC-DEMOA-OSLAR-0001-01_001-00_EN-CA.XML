@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pm xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <identAndStatusSection>
+    <pmAddress>
+      <pmIdent>
+        <pmCode
+          modelIdentCode="DEMOA"
+          pmIssuer="OSLAR"
+          pmNumber="0001"
+          pmVolume="01"/>
+        <issueInfo issueNumber="001" inWork="00"/>
+        <language languageIsoCode="en" countryIsoCode="CA"/>
+      </pmIdent>
+      <pmAddressItems>
+        <issueDate year="2026" month="03" day="30"/>
+        <pmTitle>Demo bicycle maintenance manual</pmTitle>
+        <shortPmTitle>Bicycle MM</shortPmTitle>
+      </pmAddressItems>
+    </pmAddress>
+    <pmStatus issueType="new">
+      <security securityClassification="01"/>
+    </pmStatus>
+  </identAndStatusSection>
+  <content>
+    <pmEntry pmEntryType="pmt58">
+      <pmEntryTitle>Chain maintenance</pmEntryTitle>
+      <dmRef>
+        <dmRefIdent>
+          <dmCode
+            modelIdentCode="DEMOA"
+            systemDiffCode="AAA"
+            systemCode="12"
+            subSystemCode="34"
+            subSubSystemCode="56"
+            assyCode="00"
+            disassyCode="00"
+            disassyCodeVariant="A"
+            infoCode="720"
+            infoCodeVariant="A"
+            itemLocationCode="D"/>
+          <issueInfo issueNumber="001" inWork="00"/>
+        </dmRefIdent>
+      </dmRef>
+      <dmRef>
+        <dmRefIdent>
+          <dmCode
+            modelIdentCode="DEMOA"
+            systemDiffCode="AAA"
+            systemCode="12"
+            subSystemCode="34"
+            subSubSystemCode="56"
+            assyCode="00"
+            disassyCode="00"
+            disassyCodeVariant="A"
+            infoCode="941"
+            infoCodeVariant="A"
+            itemLocationCode="D"/>
+          <issueInfo issueNumber="001" inWork="00"/>
+        </dmRefIdent>
+      </dmRef>
+      <dmRef>
+        <dmRefIdent>
+          <dmCode
+            modelIdentCode="DEMOA"
+            systemDiffCode="AAA"
+            systemCode="12"
+            subSystemCode="34"
+            subSubSystemCode="56"
+            assyCode="00"
+            disassyCode="00"
+            disassyCodeVariant="A"
+            infoCode="00N"
+            infoCodeVariant="A"
+            itemLocationCode="D"/>
+          <issueInfo issueNumber="001" inWork="00"/>
+        </dmRefIdent>
+      </dmRef>
+    </pmEntry>
+  </content>
+</pm>

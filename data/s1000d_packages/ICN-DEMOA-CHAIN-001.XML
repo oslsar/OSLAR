@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<icnMetadataFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <identAndStatusSection>
+    <infoEntityIdent infoEntityRefIdent="ICN-DEMOA-CHAIN-001"/>
+    <issueInfo issueNumber="001" inWork="00"/>
+    <language languageIsoCode="en" countryIsoCode="CA"/>
+  </identAndStatusSection>
+  <content>
+    <graphic>
+      <title>Bicycle chain assembly</title>
+      <para>Figure 01A for chain assembly and master link location.</para>
+    </graphic>
+  </content>
+</icnMetadataFile>

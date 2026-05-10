@@ -1,0 +1,100 @@
+import { pool } from "@/lib/db";
+import NamespaceReferenceLookup from "../_components/NamespaceReferenceLookup";
+
+export const dynamic = "force-dynamic";
+
+const who = await pool.query(`SELECT current_user`);
+console.log("DB USER:", who.rows[0]);
+
+export default async function Page() {
+  const nsRes = await pool.query(`
+	
+	SELECT uid::text AS uid, code::text AS code, name::text AS name
+    FROM cdm.namespace
+    ORDER BY code
+  `);
+
+  const rsRes = await pool.query(`
+    SELECT
+      uid::text AS uid,
+      namespace_uid::text AS namespace_uid,
+      code::text AS code,
+      version::text AS version,
+      title::text AS title
+    FROM cdm.reference_set
+    ORDER BY code, version
+  `);
+
+  return (
+    <main style={{ padding: 16, fontFamily: "Arial, sans-serif", maxWidth: 900 }}>
+      <h2>New Item</h2>
+
+      <form action="/demo/supdb/item-master/api/create" method="POST">
+        <div style={{ display: "grid", gap: 12 }}>
+          <label>
+            Item Code
+            <input name="item_code" required style={{ width: "100%", padding: 8 }} />
+          </label>
+
+          <label>
+            Name
+            <input name="name" style={{ width: "100%", padding: 8 }} />
+          </label>
+
+          <label>
+            Nomenclature
+            <input name="nomenclature" style={{ width: "100%", padding: 8 }} />
+          </label>
+
+          <label>
+            Item Class (cdm.item_class)
+            <input name="item_class" style={{ width: "100%", padding: 8 }} />
+          </label>
+
+          <label>
+            UOM
+            <input name="uom" style={{ width: "100%", padding: 8 }} />
+          </label>
+
+          <label>
+            Description
+            <textarea name="description" style={{ width: "100%", padding: 8, minHeight: 80 }} />
+          </label>
+
+          <label>
+            Hazard Note
+            <textarea name="hazard_note" style={{ width: "100%", padding: 8, minHeight: 80 }} />
+          </label>
+
+          <label>
+            Status (cdm.status_active)
+            <input name="status" defaultValue="active" style={{ width: "100%", padding: 8 }} />
+          </label>
+
+          {/* ✅ Dynamic filtered lookup */}
+          <NamespaceReferenceLookup
+            namespaces={nsRes.rows}
+            referenceSets={rsRes.rows}
+            defaultNamespaceUid=""
+            defaultReferenceSetUid=""
+          />
+
+          <label>
+            Notes (char)
+            <input name="notes" style={{ width: "100%", padding: 8 }} />
+          </label>
+
+          <button type="submit" style={{ padding: "8px 12px", width: 160 }}>
+            Create
+          </button>
+        </div>
+      </form>
+
+      <div style={{ marginTop: 20 }}>
+        <a href="/demo/supdb/item-master" style={{ textDecoration: "underline" }}>
+          ← Back to list
+        </a>
+      </div>
+    </main>
+  );
+}
