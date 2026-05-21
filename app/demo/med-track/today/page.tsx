@@ -1,74 +1,140 @@
-import { pool } from '@/lib/db'
-import DoseButton from './take-button'
+import Link from "next/link";
+import { pool } from "@/lib/medtrack/db";
+import StatCard from "@/components/medtrack/stat-card";
+import AppShell from "@/components/medtrack/app-shell";
+import DataTable from "@/components/medtrack/data-table";
+import PageHeader from "@/components/medtrack/page-header";
+import Button from "@/components/medtrack/button";
 
-export const dynamic = 'force-dynamic'
 
-export default async function MedTrackTodayPage() {
-  const userId = '11111111-1111-1111-1111-111111111111'
 
-  let items: any[] = []
-  let error = ''
+export const dynamic = "force-dynamic";
 
-  try {
-    const result = await pool.query(
-      `
-      select id, name, kind, strength, form
-      from medtrack.items
-      where user_id = $1
-      order by name asc
-      `,
-      [userId]
-    )
+export default async function TodayPage() {
+  const schedulesResult = await pool.query(`
+    select
+      s.id as schedule_id,
+      s.item_id,
+      s.frequency_type,
+      s.instructions,
+      i.name,
+      i.strength,
+      i.form
+    from medtrack.schedules s
+    join medtrack.items i
+      on i.id = s.item_id
+    where s.active = true
+      and i.active = true
+    order by i.name
+  `);
 
-    items = result.rows
-  } catch (err: any) {
-    error = err.message || 'Unknown error'
-  }
+  const logsResult = await pool.query(`
+    select
+      dl.id,
+      dl.status,
+      dl.taken_at,
+      i.name
+    from medtrack.dose_logs dl
+    join medtrack.items i
+      on i.id = dl.item_id
+    where dl.created_at::date = current_date
+    order by dl.created_at desc
+  `);
+
+  const schedules = schedulesResult.rows;
+  const logs = logsResult.rows;
+  const activeSchedules = schedules.length;
+  const dosesToday = logs.length;
+  
+  const takenToday = logs.filter(
+    (l: any) => l.status === "taken"
+  ).length;
 
   return (
-    <main style={{ padding: 20 }}>
-      <h1>Med Tracker - Today</h1>
-	  <div style={{ marginBottom: 16 }}>
-      <a href="/demo/med-track/history">View History</a>
-      </div>
-	  <div style={{ marginBottom: 16, display: 'flex', gap: 12 }}>
-        <a href="/demo/med-track/history">View History</a>
-        <a href="/demo/med-track/items/new">New Item</a>
-      </div>
+    <AppShell>
+      <PageHeader
+        title="Today Dashboard"
+        backHref="/demo/med-track"
+        backLabel="MedTrack Home"
+      />
 
-      {error ? (
-        <pre>{error}</pre>
-      ) : (
-        <>
-          <p>✅ If you see items below, everything is wired correctly</p>
+      
+        <div
+          style={{
+            display: "flex",
+            gap: 16,
+            flexWrap: "wrap",
+            marginTop: 20,
+            marginBottom: 32,
+          }}
+        >
+          <StatCard
+            label="Active Schedules"
+            value={activeSchedules}
+          />
+        
+          <StatCard
+            label="Doses Logged Today"
+            value={dosesToday}
+          />
+        
+          <StatCard
+            label="Taken Today"
+            value={takenToday}
+          />
+        </div>
 
-          {items.length === 0 ? (
-            <p>No items found</p>
-          ) : (
-            <div style={{ display: 'grid', gap: 12 }}>
-              {items.map((item) => (
-                <div
-                  key={item.id}
-                  style={{
-                    border: '1px solid #ccc',
-                    padding: 12,
-                    borderRadius: 8,
-                  }}
-                >
-                  <strong>{item.name}</strong>
-                  <div>{item.kind}</div>
-                  <div>{[item.strength, item.form].filter(Boolean).join(' · ')}</div>
 
-                  <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
-                    <DoseButton itemId={item.id} status="taken" label="Taken" />
-                    <DoseButton itemId={item.id} status="skipped" label="Skipped" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </>
-      )}
-    </main>
-  )
+      <h2>Scheduled Items</h2>
+
+	  <DataTable
+        rows={schedules}
+        emptyMessage="No active schedules."
+        columns={[
+          { key: "name", label: "Name" },
+          { key: "strength", label: "Strength" },
+          { key: "form", label: "Form" },
+          { key: "frequency_type", label: "Frequency" },
+          { key: "instructions", label: "Instructions" },
+          {
+            key: "actions",
+            label: "Actions",
+            render: (s: any) => (
+              <form method="POST" action="/demo/med-track/api/logs">
+                <input type="hidden" name="item_id" value={s.item_id} />
+                <input type="hidden" name="status" value="taken" />
+                <Button type="submit" variant="success">Take Dose</Button>
+              </form>
+            ),
+          },
+        ]}
+      />
+
+      <h2 style={{ marginTop: 32 }}>Today's Dose Logs</h2>
+
+      <DataTable
+        rows={logs}
+        emptyMessage="No doses logged today."
+        columns={[
+          { key: "name", label: "Item" },
+          { key: "status", label: "Status" },
+          {
+            key: "taken_at",
+            label: "Taken At",
+            render: (l: any) =>
+              l.taken_at ? new Date(l.taken_at).toLocaleString() : "",
+          },
+          {
+            key: "edit",
+            label: "Edit",
+            render: (l: any) => (
+              <Link href={`/demo/med-track/history/${l.id}/edit`}>
+                Edit
+              </Link>
+            ),
+          },
+        ]}
+      />
+    </AppShell>
+  );
 }
