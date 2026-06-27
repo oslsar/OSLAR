@@ -3,12 +3,12 @@ import AppShell from "@/components/medtrack/app-shell";
 import PageHeader from "@/components/medtrack/page-header";
 import FormBuilder from "@/components/medtrack/form-builder";
 import Button from "@/components/medtrack/button";
-import { itemFormFields } from "@/lib/medtrack/form-config";
+import { symptomFormFields } from "@/lib/medtrack/form-config";
 import { pool } from "@/lib/medtrack/db";
 
 export const dynamic = "force-dynamic";
 
-export default async function EditItemPage({
+export default async function EditSymptomPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -18,29 +18,29 @@ export default async function EditItemPage({
   const result = await pool.query(
     `
     select *
-    from medtrack.items
+    from medtrack.symptom_logs
     where id = $1
     limit 1
     `,
     [id]
   );
 
-  const item = result.rows[0];
+  const symptom = result.rows[0];
 
-  if (!item) {
+  if (!symptom) {
     notFound();
   }
 
   return (
     <AppShell>
       <PageHeader
-        title="Edit Item"
-        backHref="/demo/med-track/items"
-        backLabel="Back to Items"
+        title="Edit Symptom"
+        backHref="/demo/med-track/symptoms"
+        backLabel="Back to Symptoms"
       />
 
-      <form method="POST" action={`/demo/med-track/api/items/${item.id}`}>
-        <FormBuilder fields={itemFormFields} values={item} />
+      <form method="POST" action={`/demo/med-track/api/symptoms/${symptom.id}`}>
+        <FormBuilder fields={symptomFormFields} values={symptom} />
 
         <Button type="submit" variant="primary">
           Save Changes

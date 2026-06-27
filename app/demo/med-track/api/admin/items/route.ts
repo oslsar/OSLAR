@@ -1,42 +1,40 @@
 import { redirect } from "next/navigation";
 import { pool } from "@/lib/medtrack/db";
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
+export async function POST(request: Request) {
   const formData = await request.formData();
 
   const name = String(formData.get("name") || "").trim();
   const kind = String(formData.get("kind") || "supplement").trim();
   const strength = String(formData.get("strength") || "").trim();
-  const form = String(formData.get("form") || "").trim();
+  const itemForm = String(formData.get("form") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
   const active = formData.get("active") === "on";
 
+  if (!name) {
+    redirect("/demo/med-track/admin/items?error=missing-name");
+  }
+
   await pool.query(
     `
-    update medtrack.items
-    set
-      name = $1,
-      kind = $2,
-      strength = $3,
-      form = $4,
-      notes = $5,
-      active = $6
-    where id = $7
+    insert into medtrack.items
+      (id, user_id, name, kind, strength, form, notes, active)
+    values
+      (
+        gen_random_uuid(),
+        (select id from medtrack.users order by created_at limit 1),
+        $1, $2, $3, $4, $5, $6
+      )
     `,
     [
       name,
       kind,
       strength || null,
-      form || null,
+      itemForm || null,
       notes || null,
       active,
-      id,
     ]
   );
 
-  redirect("/demo/med-track/items?success=updated");
+  redirect("/demo/med-track/admin/items?success=created");
 }

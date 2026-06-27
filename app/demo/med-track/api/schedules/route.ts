@@ -50,5 +50,5 @@ export async function POST(request: Request) {
     ]
   );
 
-  redirect("/demo/med-track/schedules");
+  redirect("/demo/med-track/schedules?success=saved");
 }

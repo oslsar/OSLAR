@@ -46,5 +46,5 @@ export async function POST(request: Request) {
     [userId, itemId, status]
   );
 
-  redirect("/demo/med-track/today");
+  redirect("/demo/med-track/dashboard?success=taken");
 }

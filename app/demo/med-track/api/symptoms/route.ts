@@ -4,6 +4,7 @@ import { pool } from "@/lib/medtrack/db";
 export async function POST(request: Request) {
   const formData = await request.formData();
 
+  const loggedAt = String(formData.get("logged_at") || "").trim();
   const symptom = String(formData.get("symptom") || "").trim();
   const severityRaw = String(formData.get("severity") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
@@ -21,21 +22,17 @@ export async function POST(request: Request) {
     limit 1
   `);
 
-  if (userResult.rows.length === 0) {
-    throw new Error("No medtrack user found");
-  }
-
   const userId = userResult.rows[0].id;
 
   await pool.query(
     `
     insert into medtrack.symptom_logs
-      (id, user_id, symptom, severity, notes)
+      (id, user_id, logged_at, symptom, severity, notes)
     values
-      (gen_random_uuid(), $1, $2, $3, $4)
+      (gen_random_uuid(), $1, coalesce($2::timestamptz, now()), $3, $4, $5)
     `,
-    [userId, symptom, severity, notes || null]
+    [userId, loggedAt || null, symptom, severity, notes || null]
   );
 
-  redirect("/demo/med-track/symptoms");
+  redirect("/demo/med-track/symptoms?success=saved");
 }

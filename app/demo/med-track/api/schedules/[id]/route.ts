@@ -44,5 +44,5 @@ export async function POST(
     ]
   );
 
-  redirect("/demo/med-track/schedules");
+  redirect("/demo/med-track/schedules?success=updated");
 }

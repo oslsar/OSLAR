@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { pool } from "@/lib/medtrack/db";
+import AppShell from "@/components/medtrack/app-shell";
+import PageHeader from "@/components/medtrack/page-header";
+import Button from "@/components/medtrack/button";
 
 export const dynamic = "force-dynamic";
 
@@ -30,52 +33,93 @@ export default async function EditDoseLogPage({
     ? new Date(log.taken_at).toISOString().slice(0, 16)
     : "";
 
+  const fieldStyle = {
+    width: "100%",
+    padding: "8px 10px",
+    border: "1px solid #ccc",
+    borderRadius: 6,
+    marginTop: 6,
+  };
+
   return (
-    <main style={{ padding: 24, fontFamily: "Arial, sans-serif" }}>
-      <p><Link href="/demo/med-track/today">← Back to Today</Link></p>
+    <AppShell current="history">
+      <PageHeader
+        title="Edit Dose Log"
+        backHref="/demo/med-track/history"
+        backLabel="Back to History"
+      />
 
-      <h1>Edit Dose Log</h1>
+      <form
+        method="POST"
+        action={`/demo/med-track/api/logs/${log.id}`}
+        style={{
+          maxWidth: 700,
+          backgroundColor: "#fff",
+          border: "1px solid #ddd",
+          borderRadius: 10,
+          padding: 24,
+          display: "grid",
+          gap: 16,
+        }}
+      >
+        <div>
+          <div style={{ fontSize: 13, color: "#666", marginBottom: 4 }}>
+            Item
+          </div>
+          <strong>{log.name}</strong>
+        </div>
 
-      <p><strong>{log.name}</strong></p>
+        <label style={{ fontWeight: 600 }}>
+          Taken At
+          <input
+            name="taken_at"
+            type="datetime-local"
+            defaultValue={takenAt}
+            required
+            style={fieldStyle}
+          />
+        </label>
 
-      <form method="POST" action={`/demo/med-track/api/logs/${log.id}`}>
-        <p>
-          <label>
-            Taken At<br />
-            <input
-              name="taken_at"
-              type="datetime-local"
-              defaultValue={takenAt}
-              required
-            />
-          </label>
-        </p>
+        <label style={{ fontWeight: 600 }}>
+          Status
+          <select
+            name="status"
+            defaultValue={log.status}
+            style={fieldStyle}
+          >
+            <option value="taken">Taken</option>
+            <option value="skipped">Skipped</option>
+          </select>
+        </label>
 
-        <p>
-          <label>
-            Status<br />
-            <select name="status" defaultValue={log.status}>
-              <option value="taken">Taken</option>
-              <option value="skipped">Skipped</option>
-              <option value="missed">Missed</option>
-            </select>
-          </label>
-        </p>
+        <label style={{ fontWeight: 600 }}>
+          Notes
+          <textarea
+            name="notes"
+            rows={6}
+            defaultValue={log.notes ?? ""}
+            placeholder="Optional notes..."
+            style={fieldStyle}
+          />
+        </label>
 
-        <p>
-          <label>
-            Notes<br />
-            <textarea
-              name="notes"
-              rows={4}
-              defaultValue={log.notes ?? ""}
-              style={{ width: 400 }}
-            />
-          </label>
-        </p>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            marginTop: 8,
+          }}
+        >
+          <Button type="submit" variant="success">
+            Save Changes
+          </Button>
 
-        <button type="submit">Save Changes</button>
+          <Link href="/demo/med-track/history">
+            Cancel
+          </Link>
+        </div>
       </form>
-    </main>
+    </AppShell>
   );
 }

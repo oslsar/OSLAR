@@ -49,7 +49,7 @@ export default function NewItemForm() {
         return
       }
   
-      router.push('/demo/med-track/today')
+      router.push('/demo/med-track/dashboard')
       router.refresh()
     } catch (err: any) {
       setBusy(false)

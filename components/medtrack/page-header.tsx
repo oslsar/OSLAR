@@ -19,7 +19,15 @@ export default function PageHeader({
         </p>
       )}
 
-      <h1>{title}</h1>
+	  <h1
+        style={{
+          fontSize: "2rem",
+          fontWeight: 800,
+          marginBottom: 16,
+        }}
+      >
+        {title}
+      </h1>
     </div>
   );
 }

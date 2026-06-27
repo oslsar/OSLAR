@@ -9,7 +9,7 @@ export async function POST(
   const formData = await request.formData();
 
   const name = String(formData.get("name") || "").trim();
-  const kind = String(formData.get("kind") || "supplement").trim();
+  const kind = String(formData.get("kind") || "").trim();
   const strength = String(formData.get("strength") || "").trim();
   const form = String(formData.get("form") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
@@ -38,5 +38,5 @@ export async function POST(
     ]
   );
 
-  redirect("/demo/med-track/items?success=updated");
+  redirect("/demo/med-track/admin/items?success=updated");
 }

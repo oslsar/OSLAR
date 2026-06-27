@@ -4,10 +4,18 @@ export default function Button({
   children,
   type = "button",
   variant = "secondary",
+  form,
+  name,
+  value,
+  onClick,
 }: {
   children: React.ReactNode;
   type?: "button" | "submit" | "reset";
   variant?: ButtonVariant;
+  form?: string;
+  name?: string;
+  value?: string;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
 }) {
   const styles: Record<ButtonVariant, React.CSSProperties> = {
     primary: {
@@ -26,15 +34,19 @@ export default function Button({
       border: "1px solid #da3633",
     },
     secondary: {
-      background: "#f5f5f5",
-      color: "#111",
-      border: "1px solid #ccc",
+      background: "#6c757d",
+      color: "#fff",
+      border: "1px solid #6c757d",
     },
   };
 
   return (
     <button
       type={type}
+      form={form}
+      name={name}
+      value={value}
+      onClick={onClick}
       style={{
         padding: "8px 14px",
         borderRadius: 6,

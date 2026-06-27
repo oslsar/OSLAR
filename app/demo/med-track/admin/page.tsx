@@ -4,11 +4,11 @@ import PageHeader from "@/components/medtrack/page-header";
 
 export default function MedTrackAdminPage() {
   return (
-    <AppShell>
+    <AppShell current="admin">
       <PageHeader
         title="MedTrack Admin"
         backHref="/demo/med-track"
-        backLabel="MedTrack Home"
+        backLabel="Dashboard"
       />
 
       <p>Admin and data testing area for future OSLAR generic GUI patterns.</p>

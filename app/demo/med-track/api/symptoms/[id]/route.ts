@@ -8,21 +8,23 @@ export async function POST(
   const { id } = await params;
   const formData = await request.formData();
 
-  const takenAt = String(formData.get("taken_at") || "").trim();
-  const status = String(formData.get("status") || "taken").trim();
+  const symptom = String(formData.get("symptom") || "").trim();
+  const severityRaw = String(formData.get("severity") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
+
+  const severity = severityRaw ? Number(severityRaw) : null;
 
   await pool.query(
     `
-    update medtrack.dose_logs
+    update medtrack.symptom_logs
     set
-      taken_at = $1,
-      status = $2,
+      symptom = $1,
+      severity = $2,
       notes = $3
     where id = $4
     `,
-    [takenAt || null, status, notes || null, id]
+    [symptom, severity, notes || null, id]
   );
 
-  redirect("/demo/med-track/dashboard");
+  redirect("/demo/med-track/symptoms?success=updated");
 }
