@@ -1,7 +1,50 @@
 import { getEntityMetadata } from "@/lib/compiler/metadata";
-import type { CompilerPreview } from "@/lib/compiler/types";
+import type {
+  CompilerControlType,
+  CompilerPreview,
+} from "@/lib/compiler/types";
 
 const MAX_DEFAULT_LIST_COLUMNS = 10;
+
+function inferControlType(
+  formatSpec: string | null
+): CompilerControlType {
+  const spec = formatSpec?.trim().toLowerCase() ?? "";
+
+  if (spec.startsWith("decimal") || spec.startsWith("numeric")) {
+    return "decimal";
+  }
+
+  if (
+    spec.startsWith("integer") ||
+    spec.startsWith("int") ||
+    spec.startsWith("number")
+  ) {
+    return "number";
+  }
+
+  if (spec.startsWith("boolean") || spec.startsWith("bool")) {
+    return "boolean";
+  }
+
+  if (spec.startsWith("datetime") || spec.includes("timestamp")) {
+    return "datetime";
+  }
+
+  if (spec.startsWith("date")) {
+    return "date";
+  }
+
+  if (
+    spec.startsWith("text") ||
+    spec.includes("memo") ||
+    spec.includes("long")
+  ) {
+    return "textarea";
+  }
+
+  return "text";
+}
 
 export async function buildEntityPreview(
   entityCode: string
@@ -35,12 +78,14 @@ export async function buildEntityPreview(
 
   const searchFields = activeFields
     .filter((field) => {
-      const spec = field.formatSpec?.toUpperCase() ?? "";
+      const spec = field.formatSpec?.trim().toLowerCase() ?? "";
+
       return (
         field.isKey ||
-        spec.includes("A") ||
-        spec.includes("X") ||
-        spec.includes("CHAR")
+        spec.startsWith("string") ||
+        spec.startsWith("char") ||
+        spec.startsWith("varchar") ||
+        spec.startsWith("text")
       );
     })
     .slice(0, 8)
@@ -51,6 +96,16 @@ export async function buildEntityPreview(
   const readOnlyFields = activeFields
     .filter((field) => field.isKey)
     .map((field) => field.columnName);
+
+  const generatedFields = activeFields.map((field) => ({
+    columnName: field.columnName,
+    label: field.displayName,
+    controlType: inferControlType(field.formatSpec),
+    required: field.isMandatory || field.isKey,
+    readOnly: field.isKey,
+    searchable: searchFields.includes(field.columnName),
+    formatSpec: field.formatSpec,
+  }))
 
   const normalizedMappingCount = fields.reduce(
     (total, field) => total + field.standards.normalizedMappings,
@@ -111,6 +166,7 @@ export async function buildEntityPreview(
       formFields,
       readOnlyFields,
       defaultSort: keyFields[0]?.columnName ?? listColumns[0] ?? null,
+      generatedFields,
     },
     summary: {
       fieldCount: fields.length,

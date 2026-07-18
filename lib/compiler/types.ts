@@ -31,6 +31,25 @@ export type CompilerRelationship = {
   active: boolean;
 };
 
+export type CompilerControlType =
+  | "text"
+  | "number"
+  | "decimal"
+  | "boolean"
+  | "date"
+  | "datetime"
+  | "textarea";
+
+export type CompilerGuiField = {
+  columnName: string;
+  label: string;
+  controlType: CompilerControlType;
+  required: boolean;
+  readOnly: boolean;
+  searchable: boolean;
+  formatSpec: string | null;
+};
+
 export type CompilerPreview = {
   generatedAt: string;
   mode: "preview";
@@ -55,6 +74,7 @@ export type CompilerPreview = {
     formFields: string[];
     readOnlyFields: string[];
     defaultSort: string | null;
+    generatedFields: CompilerGuiField[];
   };
   summary: {
     fieldCount: number;
