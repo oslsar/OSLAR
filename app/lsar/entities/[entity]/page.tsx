@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buildEntityPreview } from "@/lib/compiler/preview";
+import { getEntityRows } from "@/lib/compiler/data";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,8 @@ export default async function EntityPage({
   if (!preview) {
     notFound();
   }
+
+  const data = await getEntityRows(preview, 25);
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-8">
@@ -65,6 +68,8 @@ export default async function EntityPage({
         />
       </section>
 
+
+
       {preview.warnings.length > 0 && (
         <section className="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-5">
           <h2 className="font-semibold text-amber-950">
@@ -88,11 +93,15 @@ export default async function EntityPage({
           Generated automatically from included fields, keys and display order.
         </p>
 
+        <p className="mt-2 text-xs text-gray-500">
+          Showing up to {data.limit} read-only records.
+        </p>
+
         <div className="mt-4 overflow-x-auto rounded-lg border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
               <tr>
-                {preview.gui.listColumns.map((column) => {
+                {data.columns.map((column) => {
                   const field = preview.fields.find(
                     (item) => item.columnName === column
                   );
@@ -112,15 +121,30 @@ export default async function EntityPage({
               </tr>
             </thead>
 
-            <tbody>
-              <tr>
-                <td
-                  colSpan={Math.max(preview.gui.listColumns.length, 1)}
-                  className="px-4 py-8 text-center text-gray-500"
-                >
-                  Data rows will be added in the next read-only runtime step.
-                </td>
-              </tr>
+            <tbody className="divide-y divide-gray-100 bg-white">
+              {data.rows.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={Math.max(data.columns.length, 1)}
+                    className="px-4 py-8 text-center text-gray-500"
+                  >
+                    No records found.
+                  </td>
+                </tr>
+              ) : (
+                data.rows.map((row, rowIndex) => (
+                  <tr key={rowIndex} className="hover:bg-gray-50">
+                    {data.columns.map((column) => (
+                      <td
+                        key={column}
+                        className="max-w-xs whitespace-nowrap px-4 py-3 text-gray-700"
+                      >
+                        {formatCellValue(row[column])}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -130,6 +154,7 @@ export default async function EntityPage({
         <h2 className="text-xl font-semibold text-gray-950">
           Proposed form
         </h2>
+
 
         <p className="mt-1 text-sm text-gray-600">
           These controls were inferred from field metadata and format rules.
@@ -196,4 +221,24 @@ function SummaryCard({
       </div>
     </div>
   );
+}
+
+function formatCellValue(value: unknown): string {
+  if (value === null || value === undefined) {
+    return "—";
+  }
+
+  if (value instanceof Date) {
+    return value.toLocaleString();
+  }
+
+  if (typeof value === "object") {
+    return JSON.stringify(value);
+  }
+
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+
+  return String(value);
 }
