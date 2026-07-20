@@ -2,32 +2,35 @@ import Link from "next/link";
 
 export default function PageHeader({
   title,
+  description,
   backHref,
-  backLabel,
+  backLabel = "Back",
 }: {
   title: string;
+  description?: string;
   backHref?: string;
   backLabel?: string;
 }) {
   return (
-    <div style={{ marginBottom: 24 }}>
+    <div className="mb-6">
       {backHref && (
-        <p>
-          <Link href={backHref}>
-            ← {backLabel || "Back"}
-          </Link>
-        </p>
+        <Link
+          href={backHref}
+          className="mb-3 inline-block text-sm text-gray-600 hover:text-gray-900"
+        >
+          ← {backLabel}
+        </Link>
       )}
 
-	  <h1
-        style={{
-          fontSize: "2rem",
-          fontWeight: 800,
-          marginBottom: 16,
-        }}
-      >
+      <h1 className="text-2xl font-bold text-gray-950">
         {title}
       </h1>
+
+      {description && (
+        <p className="mt-1 text-sm text-gray-600">
+          {description}
+        </p>
+      )}
     </div>
   );
 }
