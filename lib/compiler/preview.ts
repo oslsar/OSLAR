@@ -58,7 +58,10 @@ export async function buildEntityPreview(
   const { entity, fields, relationships, physicalTable } = metadata;
 
   const activeFields = fields.filter(
-    (field) => field.included && !field.deprecated
+    (field) =>
+      field.included &&
+      !field.deprecated &&
+      !field.behavior.hidden
   );
 
   const keyFields = activeFields.filter((field) => field.isKey);
@@ -69,6 +72,20 @@ export async function buildEntityPreview(
     (field) => field.isForeign
   );
 
+  const orderedFields = [...activeFields].sort((a, b) => {
+    const aOrder =
+      a.behavior.displayOrder ??
+      a.ordinalPosition ??
+      Number.MAX_SAFE_INTEGER;
+
+    const bOrder =
+      b.behavior.displayOrder ??
+      b.ordinalPosition ??
+      Number.MAX_SAFE_INTEGER;
+
+    return aOrder - bOrder || a.columnName.localeCompare(b.columnName);
+  });
+
   const listColumns = [
     ...keyFields,
     ...activeFields.filter((field) => !field.isKey),
@@ -76,7 +93,7 @@ export async function buildEntityPreview(
     .slice(0, MAX_DEFAULT_LIST_COLUMNS)
     .map((field) => field.columnName);
 
-  const searchFields = activeFields
+  const searchFields = orderedFields
     .filter((field) => {
       const spec = field.formatSpec?.trim().toLowerCase() ?? "";
 
@@ -91,21 +108,38 @@ export async function buildEntityPreview(
     .slice(0, 8)
     .map((field) => field.columnName);
 
-  const formFields = activeFields.map((field) => field.columnName);
+  const formFields = orderedFields.map(
+    (field) => field.columnName
+  );
 
   const readOnlyFields = activeFields
     .filter((field) => field.isKey)
     .map((field) => field.columnName);
 
-  const generatedFields = activeFields.map((field) => ({
+  const generatedFields = orderedFields.map((field) => ({
     columnName: field.columnName,
-    label: field.displayName,
-    controlType: inferControlType(field.formatSpec),
-    required: field.isMandatory || field.isKey,
-    readOnly: field.isKey,
-    searchable: searchFields.includes(field.columnName),
+    label: field.behavior.displayLabel ?? field.displayName,
+    controlType:
+      field.behavior.controlType ??
+      inferControlType(field.formatSpec),
+    required:
+      field.behavior.required ??
+      (field.isMandatory || field.isKey),
+    readOnly:
+      field.behavior.readOnly ??
+      field.isKey,
+    searchable:
+      field.behavior.searchable ??
+      searchFields.includes(field.columnName),
+    sortable:
+      field.behavior.sortable ?? true,
+    filterable:
+      field.behavior.filterable ?? true,
+    placeholder: field.behavior.placeholder,
+    helpText: field.behavior.helpText,
+    defaultWidth: field.behavior.defaultWidth,
     formatSpec: field.formatSpec,
-  }))
+  }));
 
   const normalizedMappingCount = fields.reduce(
     (total, field) => total + field.standards.normalizedMappings,

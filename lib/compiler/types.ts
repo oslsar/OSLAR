@@ -10,6 +10,20 @@ export type CompilerField = {
   isMandatory: boolean;
   included: boolean;
   deprecated: boolean;
+  behavior: {
+    displayLabel: string | null;
+    displayOrder: number | null;
+    controlType: CompilerControlType | null;
+    required: boolean | null;
+    readOnly: boolean | null;
+    hidden: boolean;
+    searchable: boolean | null;
+    sortable: boolean | null;
+    filterable: boolean | null;
+    placeholder: string | null;
+    helpText: string | null;
+    defaultWidth: number | null;
+  };
   standards: {
     ded: string | null;
     geiaShortName: string | null;
@@ -47,6 +61,11 @@ export type CompilerGuiField = {
   required: boolean;
   readOnly: boolean;
   searchable: boolean;
+  sortable: boolean;
+  filterable: boolean;
+  placeholder: string | null;
+  helpText: string | null;
+  defaultWidth: number | null;
   formatSpec: string | null;
 };
 

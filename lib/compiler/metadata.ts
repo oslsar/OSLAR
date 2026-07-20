@@ -69,11 +69,26 @@ export async function getEntityMetadata(entityCode: string) {
         f.mil_1388_field,
         f.def_std_00_60,
         f.s3000l,
+        b.display_label,
+        b.display_order,
+        b.control_type,
+        b.required AS behavior_required,
+        b.read_only AS behavior_read_only,
+        coalesce(b.hidden, false) AS behavior_hidden,
+        b.searchable AS behavior_searchable,
+        b.sortable AS behavior_sortable,
+        b.filterable AS behavior_filterable,
+        b.placeholder,
+        b.help_text,
+        b.default_width,
         count(m.mapping_id)::integer AS normalized_mapping_count
       FROM lsar_meta.field_def f
       LEFT JOIN lsar_meta.field_standard_mapping m
         ON m.field_def_id = f.field_def_id
        AND m.active = true
+      LEFT JOIN lsar_meta.field_behavior b
+        ON b.field_def_id = f.field_def_id
+       AND b.active = true
       WHERE f.entity_code = $1
       GROUP BY
         f.field_def_id,
@@ -91,7 +106,19 @@ export async function getEntityMetadata(entityCode: string) {
         f.ded,
         f.mil_1388_field,
         f.def_std_00_60,
-        f.s3000l
+        f.s3000l,
+        b.display_label,
+        b.display_order,
+        b.control_type,
+        b.required,
+        b.read_only,
+        b.hidden,
+        b.searchable,
+        b.sortable,
+        b.filterable,
+        b.placeholder,
+        b.help_text,
+        b.default_width
       ORDER BY coalesce(f.ordinal_pos, 999999), f.column_name
     `,
     [entity.entity_code]
@@ -109,6 +136,20 @@ export async function getEntityMetadata(entityCode: string) {
     isMandatory: row.is_mandatory,
     included: row.include_element,
     deprecated: row.deprecated,
+    behavior: {
+      displayLabel: row.display_label,
+      displayOrder: row.display_order,
+      controlType: row.control_type,
+      required: row.behavior_required,
+      readOnly: row.behavior_read_only,
+      hidden: row.behavior_hidden,
+      searchable: row.behavior_searchable,
+      sortable: row.behavior_sortable,
+      filterable: row.behavior_filterable,
+      placeholder: row.placeholder,
+      helpText: row.help_text,
+      defaultWidth: row.default_width,
+    },
     standards: {
       ded: row.ded,
       geiaShortName: row.geia_short_name,

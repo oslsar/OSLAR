@@ -187,12 +187,19 @@ export default async function EntityPage({
               <input
                 disabled
                 placeholder={
-                  field.readOnly
+                  field.placeholder ??
+                  (field.readOnly
                     ? "Key field"
-                    : `Enter ${field.label.toLowerCase()}`
+                    : `Enter ${field.label.toLowerCase()}`)
                 }
                 className="mt-3 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500"
               />
+
+              {field.helpText && (
+                <p className="mt-2 text-xs text-gray-500">
+                  {field.helpText}
+                </p>
+              )}
 
               <div className="mt-2 flex gap-3 text-xs text-gray-500">
                 {field.readOnly && <span>Read-only after creation</span>}
