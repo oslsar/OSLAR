@@ -81,6 +81,8 @@ export async function getEntityMetadata(entityCode: string) {
         b.placeholder,
         b.help_text,
         b.default_width,
+        b.form_section_id::text AS behavior_form_section_id,
+        b.column_span,
         count(m.mapping_id)::integer AS normalized_mapping_count
       FROM lsar_meta.field_def f
       LEFT JOIN lsar_meta.field_standard_mapping m
@@ -118,7 +120,9 @@ export async function getEntityMetadata(entityCode: string) {
         b.filterable,
         b.placeholder,
         b.help_text,
-        b.default_width
+        b.default_width,
+        b.form_section_id,
+        b.column_span
       ORDER BY coalesce(f.ordinal_pos, 999999), f.column_name
     `,
     [entity.entity_code]
@@ -149,6 +153,8 @@ export async function getEntityMetadata(entityCode: string) {
       placeholder: row.placeholder,
       helpText: row.help_text,
       defaultWidth: row.default_width,
+      formSectionId: row.behavior_form_section_id,
+      columnSpan: row.column_span,
     },
     standards: {
       ded: row.ded,
@@ -159,6 +165,33 @@ export async function getEntityMetadata(entityCode: string) {
       normalizedMappings: row.normalized_mapping_count,
     },
   }));
+
+  const formResult = await pool.query(
+    `
+      SELECT
+        fd.form_code,
+        fd.form_name,
+        fd.form_type,
+        fd.description AS form_description,
+        fs.form_section_id::text,
+        fs.section_code,
+        fs.section_name,
+        fs.description AS section_description,
+        fs.display_order,
+        fs.column_count,
+        fs.collapsible,
+        fs.initially_collapsed
+      FROM lsar_meta.form_definition fd
+      LEFT JOIN lsar_meta.form_section fs
+        ON fs.form_definition_id = fd.form_definition_id
+       AND fs.active = true
+      WHERE fd.entity_code = $1
+        AND fd.form_type = 'edit'
+        AND fd.active = true
+      ORDER BY fs.display_order, fs.section_name
+    `,
+    [entity.entity_code]
+  );
 
   const relationshipsResult = await pool.query(
     `
@@ -215,6 +248,7 @@ export async function getEntityMetadata(entityCode: string) {
     entity,
     fields,
     relationships,
+    formRows: formResult.rows,
     physicalTable: physicalResult.rows[0] ?? null,
   };
 }

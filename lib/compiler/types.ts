@@ -1,3 +1,4 @@
+
 export type CompilerField = {
   fieldDefId: string;
   fieldUid: string;
@@ -23,6 +24,9 @@ export type CompilerField = {
     placeholder: string | null;
     helpText: string | null;
     defaultWidth: number | null;
+    formSectionId: string | null;
+    columnSpan: number | null;
+
   };
   standards: {
     ded: string | null;
@@ -66,7 +70,27 @@ export type CompilerGuiField = {
   placeholder: string | null;
   helpText: string | null;
   defaultWidth: number | null;
+  columnSpan: number;
   formatSpec: string | null;
+};
+
+export type CompilerFormSection = {
+  sectionCode: string;
+  sectionName: string;
+  description: string | null;
+  displayOrder: number;
+  columnCount: number;
+  collapsible: boolean;
+  initiallyCollapsed: boolean;
+  fields: CompilerGuiField[];
+};
+
+export type CompilerForm = {
+  formCode: string;
+  formName: string;
+  formType: string;
+  description: string | null;
+  sections: CompilerFormSection[];
 };
 
 export type CompilerPreview = {
@@ -94,6 +118,7 @@ export type CompilerPreview = {
     readOnlyFields: string[];
     defaultSort: string | null;
     generatedFields: CompilerGuiField[];
+    form: CompilerForm;
   };
   summary: {
     fieldCount: number;

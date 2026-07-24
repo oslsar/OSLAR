@@ -160,52 +160,89 @@ export default async function EntityPage({
           These controls were inferred from field metadata and format rules.
         </p>
 
-        <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {preview.gui.generatedFields.map((field) => (
-            <div
-              key={field.columnName}
-              className="rounded-lg border border-gray-200 bg-white p-4"
+        <div className="mt-6 space-y-8">
+          {preview.gui.form.sections.map((section) => (
+            <section
+              key={section.sectionCode}
+              className="rounded-lg border border-gray-200 bg-white p-5"
             >
-              <div className="flex items-start justify-between gap-3">
-                <label className="text-sm font-semibold text-gray-900">
-                  {field.label}
-                  {field.required && (
-                    <span className="ml-1 text-red-600">*</span>
-                  )}
-                </label>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-950">
+                  {section.sectionName}
+                </h3>
 
-                <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-600">
-                  {field.controlType}
-                </span>
+                {section.description && (
+                  <p className="mt-1 text-sm text-gray-600">
+                    {section.description}
+                  </p>
+                )}
               </div>
 
-              <div className="mt-1 text-xs text-gray-500">
-                {field.columnName}
-                {field.formatSpec ? ` · ${field.formatSpec}` : ""}
-              </div>
-
-              <input
-                disabled
-                placeholder={
-                  field.placeholder ??
-                  (field.readOnly
-                    ? "Key field"
-                    : `Enter ${field.label.toLowerCase()}`)
-                }
-                className="mt-3 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500"
-              />
-
-              {field.helpText && (
-                <p className="mt-2 text-xs text-gray-500">
-                  {field.helpText}
+              {section.fields.length === 0 ? (
+                <p className="mt-4 text-sm text-gray-500">
+                  No fields are currently assigned to this section.
                 </p>
-              )}
+              ) : (
+                <div
+                  className={`mt-5 grid gap-5 ${gridClassForColumns(
+                    section.columnCount
+                  )}`}
+                >
+                  {section.fields.map((field) => (
+                    <div
+                      key={field.columnName}
+                      className={`rounded-lg border border-gray-200 bg-white p-4 ${gridClassForSpan(
+                        field.columnSpan
+                      )}`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <label className="text-sm font-semibold text-gray-900">
+                          {field.label}
+                          {field.required && (
+                            <span className="ml-1 text-red-600">*</span>
+                          )}
+                        </label>
 
-              <div className="mt-2 flex gap-3 text-xs text-gray-500">
-                {field.readOnly && <span>Read-only after creation</span>}
-                {field.searchable && <span>Searchable</span>}
-              </div>
-            </div>
+                        <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-600">
+                          {field.controlType}
+                        </span>
+                      </div>
+
+                      <div className="mt-1 text-xs text-gray-500">
+                        {field.columnName}
+                        {field.formatSpec ? ` · ${field.formatSpec}` : ""}
+                      </div>
+
+                      <input
+                        disabled
+                        placeholder={
+                          field.placeholder ??
+                          (field.readOnly
+                            ? "Key field"
+                            : `Enter ${field.label.toLowerCase()}`)
+                        }
+                        className="mt-3 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500"
+                      />
+
+                      {field.helpText && (
+                        <p className="mt-2 text-xs text-gray-500">
+                          {field.helpText}
+                        </p>
+                      )}
+
+                      <div className="mt-2 flex flex-wrap gap-3 text-xs text-gray-500">
+                        {field.readOnly && (
+                          <span>Read-only after creation</span>
+                        )}
+                        {field.searchable && <span>Searchable</span>}
+                        {field.sortable && <span>Sortable</span>}
+                        {field.filterable && <span>Filterable</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
           ))}
         </div>
       </section>
@@ -248,4 +285,32 @@ function formatCellValue(value: unknown): string {
   }
 
   return String(value);
+}
+
+function gridClassForColumns(columnCount: number): string {
+  switch (columnCount) {
+    case 1:
+      return "grid-cols-1";
+    case 3:
+      return "grid-cols-1 md:grid-cols-2 xl:grid-cols-3";
+    case 4:
+      return "grid-cols-1 md:grid-cols-2 xl:grid-cols-4";
+    case 2:
+    default:
+      return "grid-cols-1 md:grid-cols-2";
+  }
+}
+
+function gridClassForSpan(columnSpan: number): string {
+  switch (columnSpan) {
+    case 2:
+      return "md:col-span-2";
+    case 3:
+      return "md:col-span-2 xl:col-span-3";
+    case 4:
+      return "md:col-span-2 xl:col-span-4";
+    case 1:
+    default:
+      return "";
+  }
 }

@@ -55,7 +55,13 @@ export async function buildEntityPreview(
     return null;
   }
 
-  const { entity, fields, relationships, physicalTable } = metadata;
+  const {
+    entity,
+    fields,
+    relationships,
+    formRows,
+    physicalTable,
+  } = metadata;
 
   const activeFields = fields.filter(
     (field) =>
@@ -138,8 +144,81 @@ export async function buildEntityPreview(
     placeholder: field.behavior.placeholder,
     helpText: field.behavior.helpText,
     defaultWidth: field.behavior.defaultWidth,
+    columnSpan: field.behavior.columnSpan ?? 1,
     formatSpec: field.formatSpec,
   }));
+
+const formRow = formRows[0] ?? null;
+
+const sectionRows = formRows.filter(
+  (row) => row.form_section_id !== null
+);
+
+const generatedForm = formRow
+  ? {
+      formCode: formRow.form_code,
+      formName: formRow.form_name,
+      formType: formRow.form_type,
+      description: formRow.form_description,
+      sections: sectionRows.map((sectionRow) => {
+        const isOtherSection =
+          sectionRow.section_code === "other";
+
+        const sectionFields = generatedFields.filter(
+          (guiField) => {
+            const sourceField = fields.find(
+              (field) =>
+                field.columnName === guiField.columnName
+            );
+
+            if (!sourceField) {
+              return false;
+            }
+
+            if (isOtherSection) {
+              return (
+                sourceField.behavior.formSectionId === null
+              );
+            }
+
+            return (
+              sourceField.behavior.formSectionId ===
+              sectionRow.form_section_id
+            );
+          }
+        );
+
+        return {
+          sectionCode: sectionRow.section_code,
+          sectionName: sectionRow.section_name,
+          description: sectionRow.section_description,
+          displayOrder: sectionRow.display_order,
+          columnCount: sectionRow.column_count,
+          collapsible: sectionRow.collapsible,
+          initiallyCollapsed:
+            sectionRow.initially_collapsed,
+          fields: sectionFields,
+        };
+      }),
+    }
+  : {
+      formCode: "generated",
+      formName: `${entity.entity_code} Generated Form`,
+      formType: "edit",
+      description: null,
+      sections: [
+        {
+          sectionCode: "general",
+          sectionName: "General",
+          description: null,
+          displayOrder: 0,
+          columnCount: 2,
+          collapsible: false,
+          initiallyCollapsed: false,
+          fields: generatedFields,
+        },
+      ],
+    };
 
   const normalizedMappingCount = fields.reduce(
     (total, field) => total + field.standards.normalizedMappings,
@@ -201,6 +280,7 @@ export async function buildEntityPreview(
       readOnlyFields,
       defaultSort: keyFields[0]?.columnName ?? listColumns[0] ?? null,
       generatedFields,
+      form: generatedForm,
     },
     summary: {
       fieldCount: fields.length,
