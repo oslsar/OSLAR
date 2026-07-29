@@ -17,7 +17,10 @@ export default async function EntityPage({
     notFound();
   }
 
-  const data = await getEntityRows(preview, 25);
+  const data = await getEntityRows(
+    preview,
+    preview.behavior?.defaultPageSize ?? 25
+  );
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-8">

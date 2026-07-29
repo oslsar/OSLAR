@@ -58,8 +58,9 @@ export async function buildEntityPreview(
   const {
     entity,
     fields,
-    relationships,
+   relationships,
     formRows,
+    entityBehavior,
     physicalTable,
   } = metadata;
 
@@ -92,15 +93,38 @@ export async function buildEntityPreview(
     return aOrder - bOrder || a.columnName.localeCompare(b.columnName);
   });
 
-  const listColumns = [
+  const approvedColumnNames = new Set(
+    activeFields.map((field) => field.columnName)
+  );
+
+  const compilerListColumns = [
     ...keyFields,
-    ...activeFields.filter((field) => !field.isKey),
+    ...orderedFields.filter((field) => !field.isKey),
   ]
     .slice(0, MAX_DEFAULT_LIST_COLUMNS)
     .map((field) => field.columnName);
 
-  const searchFields = orderedFields
+  const configuredListColumns = Array.isArray(
+    entityBehavior?.default_list_columns
+  )
+    ? entityBehavior.default_list_columns.filter(
+        (column: unknown): column is string =>
+          typeof column === "string" &&
+          approvedColumnNames.has(column)
+      )
+    : [];
+
+  const listColumns =
+    configuredListColumns.length > 0
+      ? configuredListColumns
+      : compilerListColumns;
+
+  const inferredSearchFields = orderedFields
     .filter((field) => {
+      if (field.behavior.searchable !== null) {
+        return field.behavior.searchable;
+      }
+
       const spec = field.formatSpec?.trim().toLowerCase() ?? "";
 
       return (
@@ -114,6 +138,21 @@ export async function buildEntityPreview(
     .slice(0, 8)
     .map((field) => field.columnName);
 
+  const configuredSearchFields = Array.isArray(
+    entityBehavior?.default_search_columns
+  )
+    ? entityBehavior.default_search_columns.filter(
+        (column: unknown): column is string =>
+          typeof column === "string" &&
+          approvedColumnNames.has(column)
+      )
+    : [];
+
+  const searchFields =
+    configuredSearchFields.length > 0
+      ? configuredSearchFields
+      : inferredSearchFields;
+
   const formFields = orderedFields.map(
     (field) => field.columnName
   );
@@ -121,6 +160,18 @@ export async function buildEntityPreview(
   const readOnlyFields = activeFields
     .filter((field) => field.isKey)
     .map((field) => field.columnName);
+
+  const configuredDefaultSort =
+    entityBehavior?.default_sort_column &&
+    approvedColumnNames.has(entityBehavior.default_sort_column)
+      ? entityBehavior.default_sort_column
+      : null;
+
+  const defaultSort =
+    configuredDefaultSort ??
+    keyFields[0]?.columnName ??
+    listColumns[0] ??
+    null;
 
   const generatedFields = orderedFields.map((field) => ({
     columnName: field.columnName,
@@ -254,6 +305,7 @@ const generatedForm = formRow
   return {
     generatedAt: new Date().toISOString(),
     mode: "preview",
+
     entity: {
       entityCode: entity.entity_code,
       entityUid: entity.entity_uid,
@@ -261,6 +313,30 @@ const generatedForm = formRow
       included: entity.include_entity,
       profileCode: entity.profile_code,
     },
+
+  behavior: entityBehavior
+    ? {
+        navigationLabel: entityBehavior.navigation_label,
+        navigationOrder: entityBehavior.navigation_order,
+        defaultFormCode: entityBehavior.default_form_code,
+        defaultSortColumn: entityBehavior.default_sort_column,
+        defaultSortDirection:
+          entityBehavior.default_sort_direction,
+        defaultPageSize: entityBehavior.default_page_size,
+        lookupDisplayColumns:
+          entityBehavior.lookup_display_columns,
+        defaultListColumns:
+          entityBehavior.default_list_columns,
+        defaultSearchColumns:
+          entityBehavior.default_search_columns,
+        allowCreate: entityBehavior.allow_create,
+        allowEdit: entityBehavior.allow_edit,
+        allowDelete: entityBehavior.allow_delete,
+        allowImport: entityBehavior.allow_import,
+        allowExport: entityBehavior.allow_export,
+      }
+    : null,
+
     database: {
       schemaName: physicalTable?.schema_name ?? "lsar_core",
       tableName: physicalTable?.table_name ?? entity.entity_code,
@@ -278,7 +354,7 @@ const generatedForm = formRow
       searchFields,
       formFields,
       readOnlyFields,
-      defaultSort: keyFields[0]?.columnName ?? listColumns[0] ?? null,
+      defaultSort,
       generatedFields,
       form: generatedForm,
     },

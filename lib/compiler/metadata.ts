@@ -193,6 +193,31 @@ export async function getEntityMetadata(entityCode: string) {
     [entity.entity_code]
   );
 
+  const entityBehaviorResult = await pool.query(
+    `
+    SELECT
+      navigation_label,
+      navigation_order,
+      default_form_code,
+      default_sort_column,
+      default_sort_direction,
+      default_page_size,
+      lookup_display_columns,
+      default_list_columns,
+      default_search_columns,
+      allow_create,
+      allow_edit,
+      allow_delete,
+      allow_import,
+      allow_export
+    FROM lsar_meta.entity_behavior
+    WHERE entity_code = $1
+      AND active = true
+    LIMIT 1
+    `,
+    [entity.entity_code]
+  );
+
   const relationshipsResult = await pool.query(
     `
       SELECT
@@ -250,5 +275,6 @@ export async function getEntityMetadata(entityCode: string) {
     relationships,
     formRows: formResult.rows,
     physicalTable: physicalResult.rows[0] ?? null,
+    entityBehavior:  entityBehaviorResult.rows[0] ?? null,
   };
 }

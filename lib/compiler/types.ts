@@ -26,7 +26,6 @@ export type CompilerField = {
     defaultWidth: number | null;
     formSectionId: string | null;
     columnSpan: number | null;
-
   };
   standards: {
     ded: string | null;
@@ -49,6 +48,23 @@ export type CompilerRelationship = {
   active: boolean;
 };
 
+export type CompilerEntityBehavior = {
+  navigationLabel: string | null;
+  navigationOrder: number | null;
+  defaultFormCode: string | null;
+  defaultSortColumn: string | null;
+  defaultSortDirection: "asc" | "desc" | null;
+  defaultPageSize: number | null;
+  lookupDisplayColumns: string[] | null;
+  defaultListColumns: string[] | null;
+  defaultSearchColumns: string[] | null;
+  allowCreate: boolean;
+  allowEdit: boolean;
+  allowDelete: boolean;
+  allowImport: boolean;
+  allowExport: boolean;
+};
+
 export type CompilerControlType =
   | "text"
   | "number"
@@ -56,7 +72,8 @@ export type CompilerControlType =
   | "boolean"
   | "date"
   | "datetime"
-  | "textarea";
+  | "textarea"
+  | "lookup";
 
 export type CompilerGuiField = {
   columnName: string;
@@ -103,6 +120,9 @@ export type CompilerPreview = {
     included: boolean;
     profileCode: string | null;
   };
+
+  behavior: CompilerEntityBehavior | null;
+
   database: {
     schemaName: string;
     tableName: string;
