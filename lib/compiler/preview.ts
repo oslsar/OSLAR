@@ -161,6 +161,13 @@ export async function buildEntityPreview(
     .filter((field) => field.isKey)
     .map((field) => field.columnName);
 
+  const outgoingRelationships = relationships.filter(
+    (relationship) =>
+      relationship.active &&
+      relationship.relationshipType === "foreign_key" &&
+      relationship.childEntityCode === entity.entity_code
+  );
+
   const configuredDefaultSort =
     entityBehavior?.default_sort_column &&
     approvedColumnNames.has(entityBehavior.default_sort_column)
@@ -173,31 +180,57 @@ export async function buildEntityPreview(
     listColumns[0] ??
     null;
 
-  const generatedFields = orderedFields.map((field) => ({
-    columnName: field.columnName,
-    label: field.behavior.displayLabel ?? field.displayName,
-    controlType:
-      field.behavior.controlType ??
-      inferControlType(field.formatSpec),
-    required:
-      field.behavior.required ??
-      (field.isMandatory || field.isKey),
-    readOnly:
-      field.behavior.readOnly ??
-      field.isKey,
-    searchable:
-      field.behavior.searchable ??
-      searchFields.includes(field.columnName),
-    sortable:
-      field.behavior.sortable ?? true,
-    filterable:
-      field.behavior.filterable ?? true,
-    placeholder: field.behavior.placeholder,
-    helpText: field.behavior.helpText,
-    defaultWidth: field.behavior.defaultWidth,
-    columnSpan: field.behavior.columnSpan ?? 1,
-    formatSpec: field.formatSpec,
-  }));
+  const generatedFields = orderedFields.map((field) => {
+    const lookupRelationship = outgoingRelationships.find(
+      (relationship) =>
+        relationship.foreignKeyColumns.includes(field.columnName)
+    );
+
+    const lookup = lookupRelationship
+      ? {
+          relationshipId: lookupRelationship.relationshipId,
+          parentEntityCode:
+            lookupRelationship.parentEntityCode,
+          foreignKeyColumns:
+            lookupRelationship.foreignKeyColumns,
+          primaryKeyColumns:
+            lookupRelationship.primaryKeyColumns,
+          displayColumns:
+            lookupRelationship.primaryKeyColumns,
+          composite:
+            lookupRelationship.foreignKeyColumns.length > 1,
+        }
+      : null;
+
+    return {
+      columnName: field.columnName,
+      label:
+        field.behavior.displayLabel ??
+        field.displayName,
+      controlType:
+        field.behavior.controlType ??
+        (lookup ? "lookup" : inferControlType(field.formatSpec)),
+      required:
+        field.behavior.required ??
+        (field.isMandatory || field.isKey),
+      readOnly:
+        field.behavior.readOnly ??
+        field.isKey,
+      searchable:
+        field.behavior.searchable ??
+        searchFields.includes(field.columnName),
+      sortable:
+        field.behavior.sortable ?? true,
+      filterable:
+        field.behavior.filterable ?? true,
+      placeholder: field.behavior.placeholder,
+      helpText: field.behavior.helpText,
+      defaultWidth: field.behavior.defaultWidth,
+      columnSpan: field.behavior.columnSpan ?? 1,
+      formatSpec: field.formatSpec,
+      lookup,
+    };
+  });
 
 const formRow = formRows[0] ?? null;
 

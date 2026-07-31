@@ -43,9 +43,18 @@ export type CompilerRelationship = {
   parentEntityCode: string;
   constraintName: string | null;
   relationshipType: string;
-  foreignKeyColumns: unknown;
-  primaryKeyColumns: unknown;
+  foreignKeyColumns: string[];
+  primaryKeyColumns: string[];
   active: boolean;
+};
+
+export type CompilerLookup = {
+  relationshipId: string;
+  parentEntityCode: string;
+  foreignKeyColumns: string[];
+  primaryKeyColumns: string[];
+  displayColumns: string[];
+  composite: boolean;
 };
 
 export type CompilerEntityBehavior = {
@@ -89,6 +98,7 @@ export type CompilerGuiField = {
   defaultWidth: number | null;
   columnSpan: number;
   formatSpec: string | null;
+  lookup: CompilerLookup | null;
 };
 
 export type CompilerFormSection = {
