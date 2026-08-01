@@ -18,6 +18,11 @@ type PhysicalTableRow = {
   estimated_rows: string | number | null;
 };
 
+type RelatedEntityBehaviorRow = {
+  entity_code: string;
+  lookup_display_columns: string[] | null;
+};
+
 export async function getEntityMetadata(entityCode: string) {
   const normalizedCode = entityCode.trim().toUpperCase();
 
@@ -249,6 +254,43 @@ export async function getEntityMetadata(entityCode: string) {
       active: row.active,
     }));
 
+  const parentEntityCodes = [
+    ...new Set(
+      relationships
+        .filter(
+          (relationship) =>
+            relationship.active &&
+            relationship.relationshipType === "foreign_key" &&
+            relationship.childEntityCode === entity.entity_code
+        )
+        .map((relationship) => relationship.parentEntityCode)
+    ),
+  ];
+
+  const relatedEntityBehaviorResult =
+    parentEntityCodes.length > 0
+      ? await pool.query<RelatedEntityBehaviorRow>(
+          `
+          SELECT
+            entity_code,
+            lookup_display_columns
+          FROM lsar_meta.entity_behavior
+          WHERE entity_code = ANY($1::text[])
+            AND active = true
+          `,
+          [parentEntityCodes]
+        )
+      : { rows: [] as RelatedEntityBehaviorRow[] };
+
+  const relatedEntityBehaviors = Object.fromEntries(
+    relatedEntityBehaviorResult.rows.map((row) => [
+      row.entity_code,
+      {
+        lookupDisplayColumns: row.lookup_display_columns,
+      },
+    ])
+  );
+
   const physicalResult = await pool.query<PhysicalTableRow>(
     `
       SELECT
@@ -275,6 +317,7 @@ export async function getEntityMetadata(entityCode: string) {
     relationships,
     formRows: formResult.rows,
     physicalTable: physicalResult.rows[0] ?? null,
-    entityBehavior:  entityBehaviorResult.rows[0] ?? null,
+    entityBehavior: entityBehaviorResult.rows[0] ?? null,
+    relatedEntityBehaviors,
   };
 }

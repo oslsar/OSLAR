@@ -58,9 +58,10 @@ export async function buildEntityPreview(
   const {
     entity,
     fields,
-   relationships,
+    relationships,
     formRows,
     entityBehavior,
+    relatedEntityBehaviors,
     physicalTable,
   } = metadata;
 
@@ -196,6 +197,9 @@ export async function buildEntityPreview(
           primaryKeyColumns:
             lookupRelationship.primaryKeyColumns,
           displayColumns:
+            relatedEntityBehaviors[
+              lookupRelationship.parentEntityCode
+            ]?.lookupDisplayColumns ??
             lookupRelationship.primaryKeyColumns,
           composite:
             lookupRelationship.foreignKeyColumns.length > 1,
@@ -232,11 +236,11 @@ export async function buildEntityPreview(
     };
   });
 
-const formRow = formRows[0] ?? null;
+  const formRow = formRows[0] ?? null;
 
-const sectionRows = formRows.filter(
-  (row) => row.form_section_id !== null
-);
+  const sectionRows = formRows.filter(
+    (row) => row.form_section_id !== null
+  );
 
 const generatedForm = formRow
   ? {
@@ -347,28 +351,28 @@ const generatedForm = formRow
       profileCode: entity.profile_code,
     },
 
-  behavior: entityBehavior
-    ? {
-        navigationLabel: entityBehavior.navigation_label,
-        navigationOrder: entityBehavior.navigation_order,
-        defaultFormCode: entityBehavior.default_form_code,
-        defaultSortColumn: entityBehavior.default_sort_column,
-        defaultSortDirection:
-          entityBehavior.default_sort_direction,
-        defaultPageSize: entityBehavior.default_page_size,
-        lookupDisplayColumns:
-          entityBehavior.lookup_display_columns,
-        defaultListColumns:
-          entityBehavior.default_list_columns,
-        defaultSearchColumns:
-          entityBehavior.default_search_columns,
-        allowCreate: entityBehavior.allow_create,
-        allowEdit: entityBehavior.allow_edit,
-        allowDelete: entityBehavior.allow_delete,
-        allowImport: entityBehavior.allow_import,
-        allowExport: entityBehavior.allow_export,
-      }
-    : null,
+    behavior: entityBehavior
+      ? {
+          navigationLabel: entityBehavior.navigation_label,
+          navigationOrder: entityBehavior.navigation_order,
+          defaultFormCode: entityBehavior.default_form_code,
+          defaultSortColumn: entityBehavior.default_sort_column,
+          defaultSortDirection:
+            entityBehavior.default_sort_direction,
+          defaultPageSize: entityBehavior.default_page_size,
+          lookupDisplayColumns:
+            entityBehavior.lookup_display_columns,
+          defaultListColumns:
+            entityBehavior.default_list_columns,
+          defaultSearchColumns:
+            entityBehavior.default_search_columns,
+          allowCreate: entityBehavior.allow_create,
+          allowEdit: entityBehavior.allow_edit,
+          allowDelete: entityBehavior.allow_delete,
+          allowImport: entityBehavior.allow_import,
+          allowExport: entityBehavior.allow_export,
+        }
+      : null,
 
     database: {
       schemaName: physicalTable?.schema_name ?? "lsar_core",
