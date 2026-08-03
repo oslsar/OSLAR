@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buildEntityPreview } from "@/lib/compiler/preview";
 import { getEntityRows } from "@/lib/compiler/data";
+import LookupField from "@/components/compiler/lookup-field";
 
 export const dynamic = "force-dynamic";
 
@@ -216,16 +217,27 @@ export default async function EntityPage({
                         {field.formatSpec ? ` · ${field.formatSpec}` : ""}
                       </div>
 
-                      <input
-                        disabled
-                        placeholder={
-                          field.placeholder ??
-                          (field.readOnly
-                            ? "Key field"
-                            : `Enter ${field.label.toLowerCase()}`)
-                        }
-                        className="mt-3 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500"
-                      />
+                      {field.controlType === "lookup" && field.lookup ? (
+                        <LookupField
+                          lookup={field.lookup}
+                          required={field.required}
+                          placeholder={
+                            field.placeholder ??
+                            `Select ${field.label.toLowerCase()}`
+                          }
+                        />
+                      ) : (
+                        <input
+                          disabled
+                          placeholder={
+                            field.placeholder ??
+                            (field.readOnly
+                              ? "Key field"
+                              : `Enter ${field.label.toLowerCase()}`)
+                          }
+                          className="mt-3 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500"
+                        />
+                      )}
 
                       {field.helpText && (
                         <p className="mt-2 text-xs text-gray-500">
