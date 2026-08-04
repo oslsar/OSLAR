@@ -90,7 +90,7 @@ export default async function EntityPage({
 
       <section className="mt-8">
         <h2 className="text-xl font-semibold text-gray-950">
-          Proposed list view
+          Generated list view
         </h2>
 
         <p className="mt-1 text-sm text-gray-600">
@@ -156,51 +156,48 @@ export default async function EntityPage({
 
       <section className="mt-10">
         <h2 className="text-xl font-semibold text-gray-950">
-          Proposed form
+          Generated form
         </h2>
 
 
         <p className="mt-1 text-sm text-gray-600">
-          These controls were inferred from field metadata and format rules.
+          Generated from entity, field, relationship, behaviour and layout metadata.
         </p>
 
         <div className="mt-6 space-y-8">
-          {preview.gui.form.sections.map((section) => (
-            <section
-              key={section.sectionCode}
-              className="rounded-lg border border-gray-200 bg-white p-5"
-            >
-              <div>
-                <h3 className="text-lg font-semibold text-gray-950">
-                  {section.sectionName}
-                </h3>
+          {preview.gui.form.sections
+            .filter((section) => section.fields.length > 0)
+            .map((section) => (
+              <section
+                key={section.sectionCode}
+                className="rounded-lg border border-gray-200 bg-white p-5"
+              >
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-950">
+                    {section.sectionName}
+                  </h3>
 
-                {section.description && (
-                  <p className="mt-1 text-sm text-gray-600">
-                    {section.description}
-                  </p>
-                )}
-              </div>
+                  {section.description && (
+                    <p className="mt-1 text-sm text-gray-600">
+                      {section.description}
+                    </p>
+                  )}
+                </div>
 
-              {section.fields.length === 0 ? (
-                <p className="mt-4 text-sm text-gray-500">
-                  No fields are currently assigned to this section.
-                </p>
-              ) : (
                 <div
-                  className={`mt-5 grid gap-5 ${gridClassForColumns(
+                  className={`mt-5 grid gap-4 ${gridClassForColumns(
                     section.columnCount
                   )}`}
                 >
                   {section.fields.map((field) => (
                     <div
                       key={field.columnName}
-                      className={`rounded-lg border border-gray-200 bg-white p-4 ${gridClassForSpan(
+                      className={`rounded-md border border-gray-200 bg-gray-50/40 p-3 ${gridClassForSpan(
                         field.columnSpan
                       )}`}
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <label className="text-sm font-semibold text-gray-900">
+                        <label className="text-sm font-medium text-gray-900">
                           {field.label}
                           {field.required && (
                             <span className="ml-1 text-red-600">*</span>
@@ -212,7 +209,7 @@ export default async function EntityPage({
                         </span>
                       </div>
 
-                      <div className="mt-1 text-xs text-gray-500">
+                      <div className="mt-0.5 text-[11px] text-gray-500">
                         {field.columnName}
                         {field.formatSpec ? ` · ${field.formatSpec}` : ""}
                       </div>
@@ -256,9 +253,8 @@ export default async function EntityPage({
                     </div>
                   ))}
                 </div>
-              )}
-            </section>
-          ))}
+              </section>
+            ))}
         </div>
       </section>
     </main>
