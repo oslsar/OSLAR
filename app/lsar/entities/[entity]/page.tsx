@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buildEntityPreview } from "@/lib/compiler/preview";
 import { getEntityRows } from "@/lib/compiler/data";
-import LookupField from "@/components/compiler/lookup-field";
+import GeneratedForm from "@/components/compiler/generated-form";
 
 export const dynamic = "force-dynamic";
 
@@ -164,98 +164,7 @@ export default async function EntityPage({
           Generated from entity, field, relationship, behaviour and layout metadata.
         </p>
 
-        <div className="mt-6 space-y-8">
-          {preview.gui.form.sections
-            .filter((section) => section.fields.length > 0)
-            .map((section) => (
-              <section
-                key={section.sectionCode}
-                className="rounded-lg border border-gray-200 bg-white p-5"
-              >
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-950">
-                    {section.sectionName}
-                  </h3>
-
-                  {section.description && (
-                    <p className="mt-1 text-sm text-gray-600">
-                      {section.description}
-                    </p>
-                  )}
-                </div>
-
-                <div
-                  className={`mt-5 grid gap-4 ${gridClassForColumns(
-                    section.columnCount
-                  )}`}
-                >
-                  {section.fields.map((field) => (
-                    <div
-                      key={field.columnName}
-                      className={`rounded-md border border-gray-200 bg-gray-50/40 p-3 ${gridClassForSpan(
-                        field.columnSpan
-                      )}`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <label className="text-sm font-medium text-gray-900">
-                          {field.label}
-                          {field.required && (
-                            <span className="ml-1 text-red-600">*</span>
-                          )}
-                        </label>
-
-                        <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-600">
-                          {field.controlType}
-                        </span>
-                      </div>
-
-                      <div className="mt-0.5 text-[11px] text-gray-500">
-                        {field.columnName}
-                        {field.formatSpec ? ` · ${field.formatSpec}` : ""}
-                      </div>
-
-                      {field.controlType === "lookup" && field.lookup ? (
-                        <LookupField
-                          lookup={field.lookup}
-                          required={field.required}
-                          placeholder={
-                            field.placeholder ??
-                            `Select ${field.label.toLowerCase()}`
-                          }
-                        />
-                      ) : (
-                        <input
-                          disabled
-                          placeholder={
-                            field.placeholder ??
-                            (field.readOnly
-                              ? "Key field"
-                              : `Enter ${field.label.toLowerCase()}`)
-                          }
-                          className="mt-3 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500"
-                        />
-                      )}
-
-                      {field.helpText && (
-                        <p className="mt-2 text-xs text-gray-500">
-                          {field.helpText}
-                        </p>
-                      )}
-
-                      <div className="mt-2 flex flex-wrap gap-3 text-xs text-gray-500">
-                        {field.readOnly && (
-                          <span>Read-only after creation</span>
-                        )}
-                        {field.searchable && <span>Searchable</span>}
-                        {field.sortable && <span>Sortable</span>}
-                        {field.filterable && <span>Filterable</span>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            ))}
-        </div>
+        <GeneratedForm form={preview.gui.form} />
       </section>
     </main>
   );
@@ -296,32 +205,4 @@ function formatCellValue(value: unknown): string {
   }
 
   return String(value);
-}
-
-function gridClassForColumns(columnCount: number): string {
-  switch (columnCount) {
-    case 1:
-      return "grid-cols-1";
-    case 3:
-      return "grid-cols-1 md:grid-cols-2 xl:grid-cols-3";
-    case 4:
-      return "grid-cols-1 md:grid-cols-2 xl:grid-cols-4";
-    case 2:
-    default:
-      return "grid-cols-1 md:grid-cols-2";
-  }
-}
-
-function gridClassForSpan(columnSpan: number): string {
-  switch (columnSpan) {
-    case 2:
-      return "md:col-span-2";
-    case 3:
-      return "md:col-span-2 xl:col-span-3";
-    case 4:
-      return "md:col-span-2 xl:col-span-4";
-    case 1:
-    default:
-      return "";
-  }
 }
