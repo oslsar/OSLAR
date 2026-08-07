@@ -92,6 +92,23 @@ export type CompilerValidation = {
   scale: number | null;
 };
 
+export type CompilerValidationError = {
+  columnName: string;
+  label: string;
+  code:
+    | "required"
+    | "max_length"
+    | "integer_digits"
+    | "decimal_format"
+    | "unknown_field";
+  message: string;
+};
+
+export type CompilerValidationResult = {
+  valid: boolean;
+  errors: CompilerValidationError[];
+};
+
 export type CompilerGuiField = {
   columnName: string;
   label: string;
