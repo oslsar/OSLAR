@@ -46,6 +46,63 @@ function inferControlType(
   return "text";
 }
 
+function inferValidation(
+  formatSpec: string | null,
+  required: boolean
+) {
+  const spec = formatSpec?.trim().toLowerCase() ?? "";
+
+  const stringMatch = spec.match(
+    /^(?:string|char|varchar)\s*\(\s*(\d+)\s*\)$/
+  );
+
+  if (stringMatch) {
+    return {
+      required,
+      maxLength: Number(stringMatch[1]),
+      integerDigits: null,
+      precision: null,
+      scale: null,
+    };
+  }
+
+  const integerMatch = spec.match(
+    /^(?:integer|int|number)\s*\(\s*(\d+)\s*\)$/
+  );
+
+  if (integerMatch) {
+    return {
+      required,
+      maxLength: null,
+      integerDigits: Number(integerMatch[1]),
+      precision: null,
+      scale: null,
+    };
+  }
+
+  const decimalMatch = spec.match(
+    /^(?:decimal|numeric)\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)$/
+  );
+
+  if (decimalMatch) {
+    return {
+      required,
+      maxLength: null,
+      integerDigits: null,
+      precision: Number(decimalMatch[1]),
+      scale: Number(decimalMatch[2]),
+    };
+  }
+
+  return {
+    required,
+    maxLength: null,
+    integerDigits: null,
+    precision: null,
+    scale: null,
+  };
+}
+
 export async function buildEntityPreview(
   entityCode: string
 ): Promise<CompilerPreview | null> {
@@ -206,6 +263,10 @@ export async function buildEntityPreview(
         }
       : null;
 
+    const required =
+      field.behavior.required ??
+      (field.isMandatory || field.isKey);
+
     return {
       columnName: field.columnName,
       label:
@@ -214,9 +275,7 @@ export async function buildEntityPreview(
       controlType:
         field.behavior.controlType ??
         (lookup ? "lookup" : inferControlType(field.formatSpec)),
-      required:
-        field.behavior.required ??
-        (field.isMandatory || field.isKey),
+      required,
       readOnly:
         field.behavior.readOnly ??
         field.isKey,
@@ -233,6 +292,10 @@ export async function buildEntityPreview(
       columnSpan: field.behavior.columnSpan ?? 1,
       formatSpec: field.formatSpec,
       lookup,
+      validation: inferValidation(
+        field.formatSpec,
+        required
+      ),
     };
   });
 

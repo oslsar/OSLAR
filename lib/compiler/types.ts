@@ -84,6 +84,14 @@ export type CompilerControlType =
   | "textarea"
   | "lookup";
 
+export type CompilerValidation = {
+  required: boolean;
+  maxLength: number | null;
+  integerDigits: number | null;
+  precision: number | null;
+  scale: number | null;
+};
+
 export type CompilerGuiField = {
   columnName: string;
   label: string;
@@ -99,6 +107,7 @@ export type CompilerGuiField = {
   columnSpan: number;
   formatSpec: string | null;
   lookup: CompilerLookup | null;
+  validation: CompilerValidation;
 };
 
 export type CompilerFormSection = {

@@ -47,6 +47,54 @@ function stringValue(value: unknown): string {
   return String(value);
 }
 
+function validateFieldValue(
+  field: CompilerGuiField,
+  value: unknown
+): string | null {
+  const text = stringValue(value);
+
+  if (field.validation.required && text.trim() === "") {
+    return `${field.label} is required.`;
+  }
+
+  if (
+    field.validation.maxLength !== null &&
+    text.length > field.validation.maxLength
+  ) {
+    return `${field.label} must not exceed ${field.validation.maxLength} characters.`;
+  }
+
+  if (
+    field.validation.integerDigits !== null &&
+    text !== "" &&
+    !new RegExp(
+      `^-?\\d{1,${field.validation.integerDigits}}$`
+    ).test(text)
+  ) {
+    return `${field.label} must contain no more than ${field.validation.integerDigits} integer digits.`;
+  }
+
+  if (
+    field.validation.precision !== null &&
+    field.validation.scale !== null &&
+    text !== ""
+  ) {
+    const integerDigits =
+      field.validation.precision -
+      field.validation.scale;
+
+    const decimalPattern = new RegExp(
+      `^-?\\d{1,${integerDigits}}(?:\\.\\d{1,${field.validation.scale}})?$`
+    );
+
+    if (!decimalPattern.test(text)) {
+      return `${field.label} must have no more than ${integerDigits} integer digits and ${field.validation.scale} decimal places.`;
+    }
+  }
+
+  return null;
+}
+
 export default function GeneratedForm({
   form,
 }: GeneratedFormProps) {
@@ -65,6 +113,9 @@ export default function GeneratedForm({
   const [values, setValues] =
     useState<Record<string, unknown>>(initialValues);
 
+  const [touched, setTouched] =
+    useState<Record<string, boolean>>({});
+
   function setFieldValue(
     columnName: string,
     value: unknown
@@ -72,6 +123,13 @@ export default function GeneratedForm({
     setValues((current) => ({
       ...current,
       [columnName]: value,
+    }));
+  }
+
+  function markTouched(columnName: string) {
+    setTouched((current) => ({
+      ...current,
+      [columnName]: true,
     }));
   }
 
@@ -130,8 +188,14 @@ export default function GeneratedForm({
                 section.columnCount
               )}`}
             >
-              {section.fields.map((field) => (
-                <div
+              {section.fields.map((field) => {
+                const validationError = validateFieldValue(
+                  field,
+                  values[field.columnName]
+                );
+
+                return (
+                  <div
                   key={field.columnName}
                   className={`rounded-md border border-gray-200 bg-gray-50/40 p-3 ${gridClassForSpan(
                     field.columnSpan
@@ -140,7 +204,7 @@ export default function GeneratedForm({
                   <div className="flex items-start justify-between gap-3">
                     <label className="text-sm font-medium text-gray-900">
                       {field.label}
-                      {field.required && (
+                      {field.validation.required && (
                         <span className="ml-1 text-red-600">*</span>
                       )}
                     </label>
@@ -176,17 +240,15 @@ export default function GeneratedForm({
                           }
                         )
                       )}
-                      required={field.required}
+                      required={field.validation.required}
                       placeholder={
                         field.placeholder ??
                         `Select ${field.label.toLowerCase()}`
                       }
-                      onChange={(selectedKey) =>
-                        applyLookupSelection(
-                          field,
-                          selectedKey
-                        )
-                      }
+                      onChange={(selectedKey) => {
+                        applyLookupSelection(field, selectedKey);
+                        markTouched(field.columnName);
+                      }}
                     />
                   ) : (
                     <input
@@ -201,7 +263,7 @@ export default function GeneratedForm({
                               : "text"
                       }
                       disabled={field.readOnly}
-                      required={field.required}
+                      required={field.validation.required}
                       value={stringValue(
                         values[field.columnName]
                       )}
@@ -211,11 +273,20 @@ export default function GeneratedForm({
                           event.target.value
                         )
                       }
+                      onBlur={() => markTouched(field.columnName)}
                       placeholder={
                         field.placeholder ??
                         (field.readOnly
                           ? "Read-only"
                           : `Enter ${field.label.toLowerCase()}`)
+                      }
+                      maxLength={
+                        field.validation.maxLength ?? undefined
+                      }
+                      step={
+                        field.validation.scale !== null
+                          ? 10 ** -field.validation.scale
+                          : undefined
                       }
                       className="mt-3 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
                     />
@@ -235,8 +306,14 @@ export default function GeneratedForm({
                     {field.sortable && <span>Sortable</span>}
                     {field.filterable && <span>Filterable</span>}
                   </div>
-                </div>
-              ))}
+                 {touched[field.columnName] && validationError && (
+                   <p className="mt-2 text-xs text-red-600">
+                     {validationError}
+                   </p>
+                 )}
+               </div>
+             );
+           })}
             </div>
           </section>
         ))}
