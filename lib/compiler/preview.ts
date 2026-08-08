@@ -226,6 +226,14 @@ export async function buildEntityPreview(
       relationship.childEntityCode === entity.entity_code
   );
 
+  const compositeLookupCompanionColumns = new Set(
+    outgoingRelationships.flatMap((relationship) =>
+      relationship.foreignKeyColumns.length > 1
+        ? relationship.foreignKeyColumns.slice(1)
+        : []
+    )
+  );
+
   const configuredDefaultSort =
     entityBehavior?.default_sort_column &&
     approvedColumnNames.has(entityBehavior.default_sort_column)
@@ -241,7 +249,7 @@ export async function buildEntityPreview(
   const generatedFields = orderedFields.map((field) => {
     const lookupRelationship = outgoingRelationships.find(
       (relationship) =>
-        relationship.foreignKeyColumns.includes(field.columnName)
+        relationship.foreignKeyColumns[0] === field.columnName
     );
 
     const lookup = lookupRelationship
@@ -278,7 +286,10 @@ export async function buildEntityPreview(
       required,
       readOnly:
         field.behavior.readOnly ??
-        field.isKey,
+        (
+          field.isKey ||
+          compositeLookupCompanionColumns.has(field.columnName)
+        ),
       searchable:
         field.behavior.searchable ??
         searchFields.includes(field.columnName),
