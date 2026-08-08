@@ -100,11 +100,25 @@ export type CompilerValidationError = {
     | "max_length"
     | "integer_digits"
     | "decimal_format"
-    | "unknown_field";
+    | "unknown_field"
+    | "invalid_type"
+    | "partial_foreign_key"
+    | "foreign_key_not_found";
   message: string;
 };
 
 export type CompilerValidationResult = {
+  valid: boolean;
+  errors: CompilerValidationError[];
+};
+
+export type CompilerCoercionResult = {
+  valid: boolean;
+  values: Record<string, unknown>;
+  errors: CompilerValidationError[];
+};
+
+export type CompilerForeignKeyValidationResult = {
   valid: boolean;
   errors: CompilerValidationError[];
 };
