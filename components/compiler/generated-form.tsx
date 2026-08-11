@@ -7,8 +7,11 @@ import type {
   CompilerGuiField,
 } from "@/lib/compiler/types";
 
+type GeneratedFormMode = "create" | "edit" | "view";
+
 type GeneratedFormProps = {
   form: CompilerForm;
+  mode?: GeneratedFormMode;
 };
 
 function gridClassForColumns(columnCount: number): string {
@@ -45,6 +48,20 @@ function stringValue(value: unknown): string {
   }
 
   return String(value);
+}
+
+function stepForScale(
+  scale: number | null
+): string | undefined {
+  if (scale === null) {
+    return undefined;
+  }
+
+  if (scale <= 0) {
+    return "1";
+  }
+
+  return `0.${"0".repeat(scale - 1)}1`;
 }
 
 function validateFieldValue(
@@ -97,6 +114,7 @@ function validateFieldValue(
 
 export default function GeneratedForm({
   form,
+  mode = "view",
 }: GeneratedFormProps) {
   const initialValues = useMemo(() => {
     const values: Record<string, unknown> = {};
@@ -194,6 +212,17 @@ export default function GeneratedForm({
                   values[field.columnName]
                 );
 
+                const effectiveReadOnly =
+                  mode === "view"
+                    ? true
+                    : mode === "create"
+                      ? (
+                          field.lookup === null &&
+                          field.readOnly &&
+                          !field.validation.required
+                        )
+                      : field.readOnly;
+
                 return (
                   <div
                   key={field.columnName}
@@ -225,6 +254,7 @@ export default function GeneratedForm({
                   field.lookup ? (
                     <LookupField
                       lookup={field.lookup}
+	              disabled={mode === "view"}
                       value={Object.fromEntries(
                         field.lookup.primaryKeyColumns.map(
                           (primaryColumn, index) => {
@@ -262,7 +292,7 @@ export default function GeneratedForm({
                               ? "datetime-local"
                               : "text"
                       }
-                      disabled={field.readOnly}
+                      disabled={effectiveReadOnly}
                       required={field.validation.required}
                       value={stringValue(
                         values[field.columnName]
@@ -276,18 +306,14 @@ export default function GeneratedForm({
                       onBlur={() => markTouched(field.columnName)}
                       placeholder={
                         field.placeholder ??
-                        (field.readOnly
+                        (effectiveReadOnly
                           ? "Read-only"
                           : `Enter ${field.label.toLowerCase()}`)
                       }
                       maxLength={
                         field.validation.maxLength ?? undefined
                       }
-                      step={
-                        field.validation.scale !== null
-                          ? 10 ** -field.validation.scale
-                          : undefined
-                      }
+                      step={stepForScale(field.validation.scale)}
                       className="mt-3 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
                     />
                   )}

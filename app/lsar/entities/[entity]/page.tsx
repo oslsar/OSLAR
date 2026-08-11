@@ -164,7 +164,10 @@ export default async function EntityPage({
           Generated from entity, field, relationship, behaviour and layout metadata.
         </p>
 
-        <GeneratedForm form={preview.gui.form} />
+        <GeneratedForm
+          form={preview.gui.form}
+          mode="create"
+        />
       </section>
     </main>
   );
