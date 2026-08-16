@@ -251,6 +251,9 @@ export default function GeneratedForm({
       setSubmitSuccess(
         `${entityCode} record created successfully.`
       );
+
+      setValues({ ...initialValues });
+      setTouched({});
     } catch (error) {
       console.error("Create request failed:", error);
       setSubmitError("Unable to create record.");
