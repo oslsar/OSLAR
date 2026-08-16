@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import LookupField from "@/components/compiler/lookup-field";
 import type {
   CompilerForm,
@@ -118,6 +119,8 @@ export default function GeneratedForm({
   form,
   mode = "view",
 }: GeneratedFormProps) {
+  const router = useRouter();
+
   const initialValues = useMemo(() => {
     const values: Record<string, unknown> = {};
 
@@ -254,6 +257,7 @@ export default function GeneratedForm({
 
       setValues({ ...initialValues });
       setTouched({});
+      router.refresh();
     } catch (error) {
       console.error("Create request failed:", error);
       setSubmitError("Unable to create record.");
