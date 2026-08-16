@@ -165,6 +165,7 @@ export default async function EntityPage({
         </p>
 
         <GeneratedForm
+          entityCode={preview.entity.entityCode}
           form={preview.gui.form}
           mode="create"
         />

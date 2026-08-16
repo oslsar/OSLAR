@@ -10,6 +10,7 @@ import type {
 type GeneratedFormMode = "create" | "edit" | "view";
 
 type GeneratedFormProps = {
+  entityCode: string;
   form: CompilerForm;
   mode?: GeneratedFormMode;
 };
@@ -113,6 +114,7 @@ function validateFieldValue(
 }
 
 export default function GeneratedForm({
+  entityCode,
   form,
   mode = "view",
 }: GeneratedFormProps) {
@@ -128,11 +130,36 @@ export default function GeneratedForm({
     return values;
   }, [form.sections]);
 
+  const lookupCompanionColumns = useMemo(() => {
+    const columns = new Set<string>();
+
+    for (const section of form.sections) {
+      for (const field of section.fields) {
+        if (!field.lookup || !field.lookup.composite) {
+          continue;
+        }
+
+        for (
+          const columnName of
+          field.lookup.foreignKeyColumns.slice(1)
+        ) {
+          columns.add(columnName);
+        }
+      }
+    }
+
+    return columns;
+  }, [form.sections]);
+
   const [values, setValues] =
     useState<Record<string, unknown>>(initialValues);
 
   const [touched, setTouched] =
     useState<Record<string, boolean>>({});
+
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
   function setFieldValue(
     columnName: string,
@@ -180,6 +207,58 @@ export default function GeneratedForm({
     });
   }
 
+  async function handleSubmit() {
+    if (mode !== "create") {
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(null);
+
+    try {
+      const response = await fetch(
+        `/api/compiler/entities/${encodeURIComponent(entityCode)}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        if (Array.isArray(result.errors) && result.errors.length > 0) {
+          setSubmitError(
+            result.errors
+              .map((error: { message?: string }) =>
+                error.message ?? "Validation error"
+              )
+              .join(" ")
+          );
+        } else {
+          setSubmitError(
+            result.error ?? "Unable to create record."
+          );
+        }
+
+        return;
+      }
+
+      setSubmitSuccess(
+        `${entityCode} record created successfully.`
+      );
+    } catch (error) {
+      console.error("Create request failed:", error);
+      setSubmitError("Unable to create record.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div className="mt-6 space-y-8">
       {form.sections
@@ -216,11 +295,9 @@ export default function GeneratedForm({
                   mode === "view"
                     ? true
                     : mode === "create"
-                      ? (
-                          field.lookup === null &&
-                          field.readOnly &&
-                          !field.validation.required
-                        )
+                      ? lookupCompanionColumns.has(field.columnName)
+                        ? true
+                        : field.readOnly && !field.validation.required
                       : field.readOnly;
 
                 return (
@@ -343,6 +420,33 @@ export default function GeneratedForm({
             </div>
           </section>
         ))}
+
+      {mode === "create" && (
+        <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-5">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {submitting ? "Creating..." : "Create record"}
+            </button>
+          </div>
+
+          {submitError && (
+            <p className="text-sm text-red-600">
+              {submitError}
+            </p>
+          )}
+
+          {submitSuccess && (
+            <p className="text-sm text-green-700">
+              {submitSuccess}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
