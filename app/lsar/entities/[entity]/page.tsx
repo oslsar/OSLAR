@@ -129,7 +129,16 @@ export default async function EntityPage({
               {data.rows.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={Math.max(data.columns.length, 1)}
+                    colSpan={Math.max(
+                      data.columns.length +
+                        (
+                          preview.behavior?.allowEdit &&
+                          data.keyColumns.length > 0
+                            ? 1
+                            : 0
+                        ),
+                      1
+                    )}
                     className="px-4 py-8 text-center text-gray-500"
                   >
                     No records found.
@@ -146,6 +155,22 @@ export default async function EntityPage({
                         {formatCellValue(row[column])}
                       </td>
                     ))}
+
+                    {preview.behavior?.allowEdit &&
+                      data.keyColumns.length > 0 && (
+                        <td className="whitespace-nowrap px-4 py-3">
+                          <Link
+                            href={buildEditHref(
+                              preview.entity.entityCode,
+                              data.keyColumns,
+                              row
+                            )}
+                            className="text-sm font-medium text-blue-700 no-underline hover:underline"
+                          >
+                            Edit
+                          </Link>
+                        </td>
+                      )}
                   </tr>
                 ))
               )}
@@ -188,6 +213,27 @@ function SummaryCard({
         {value}
       </div>
     </div>
+  );
+}
+
+function buildEditHref(
+  entityCode: string,
+  keyColumns: string[],
+  row: Record<string, unknown>
+): string {
+  const params = new URLSearchParams();
+
+  for (const column of keyColumns) {
+    const value = row[column];
+
+    if (value !== null && value !== undefined) {
+      params.set(column, String(value));
+    }
+  }
+
+  return (
+    `/lsar/entities/${encodeURIComponent(entityCode)}/edit` +
+    `?${params.toString()}`
   );
 }
 

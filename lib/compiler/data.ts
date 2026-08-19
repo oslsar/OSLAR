@@ -3,6 +3,7 @@ import type { CompilerPreview } from "@/lib/compiler/types";
 
 export type CompilerDataResult = {
   columns: string[];
+  keyColumns: string[];
   rows: Record<string, unknown>[];
   limit: number;
 };
@@ -22,6 +23,14 @@ export async function getEntityRows(
   if (!preview.database.tableExists) {
     return {
       columns: preview.gui.listColumns,
+      keyColumns: preview.fields
+        .filter(
+          (field) =>
+            field.included &&
+            !field.deprecated &&
+            field.isKey
+        )
+        .map((field) => field.columnName),
       rows: [],
       limit: 0,
     };
@@ -35,13 +44,24 @@ export async function getEntityRows(
       .map((field) => field.columnName)
   );
 
+  const keyColumns = preview.fields
+    .filter(
+      (field) =>
+        field.included &&
+        !field.deprecated &&
+        field.isKey
+    )
+    .map((field) => field.columnName)
+    .filter((column) => approvedColumns.has(column));
+
   const columns = preview.gui.listColumns.filter((column) =>
     approvedColumns.has(column)
   );
 
-  if (columns.length === 0) {
+  if (columns.length === 0 && keyColumns.length === 0) {
     return {
       columns: [],
+      keyColumns: [],
       rows: [],
       limit,
     };
@@ -49,13 +69,24 @@ export async function getEntityRows(
 
   const schemaSql = quoteIdentifier(preview.database.schemaName);
   const tableSql = quoteIdentifier(preview.database.tableName);
-  const columnSql = columns.map(quoteIdentifier).join(", ");
+  const selectedColumns = [
+    ...new Set([
+      ...columns,
+      ...keyColumns,
+    ]),
+  ];
+
+  const columnSql = selectedColumns
+    .map(quoteIdentifier)
+    .join(", ");
 
   const defaultSort =
     preview.gui.defaultSort &&
     approvedColumns.has(preview.gui.defaultSort)
       ? preview.gui.defaultSort
-      : columns[0];
+      : keyColumns[0] ??
+        columns[0] ??
+        selectedColumns[0];
 
   const orderSql = quoteIdentifier(defaultSort);
 
@@ -71,6 +102,7 @@ export async function getEntityRows(
 
   return {
     columns,
+    keyColumns,
     rows: result.rows,
     limit,
   };
