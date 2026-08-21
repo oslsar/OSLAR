@@ -8,6 +8,11 @@ export type CompilerDataResult = {
   limit: number;
 };
 
+export type CompilerRecordResult = {
+  keyColumns: string[];
+  row: Record<string, unknown> | null;
+};
+
 function quoteIdentifier(identifier: string): string {
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(identifier)) {
     throw new Error(`Unsafe database identifier: ${identifier}`);
@@ -67,8 +72,13 @@ export async function getEntityRows(
     };
   }
 
-  const schemaSql = quoteIdentifier(preview.database.schemaName);
-  const tableSql = quoteIdentifier(preview.database.tableName);
+  const schemaSql = quoteIdentifier(
+    preview.database.schemaName
+  );
+  const tableSql = quoteIdentifier(
+    preview.database.tableName
+  );
+
   const selectedColumns = [
     ...new Set([
       ...columns,
@@ -105,5 +115,94 @@ export async function getEntityRows(
     keyColumns,
     rows: result.rows,
     limit,
+  };
+}
+
+export async function getEntityRecord(
+  preview: CompilerPreview,
+  keyValues: Record<string, string>
+): Promise<CompilerRecordResult> {
+  if (!preview.database.tableExists) {
+    return {
+      keyColumns: [],
+      row: null,
+    };
+  }
+
+  const approvedColumns = new Set(
+    preview.fields
+      .filter((field) => field.included && !field.deprecated)
+      .map((field) => field.columnName)
+  );
+
+  const keyColumns = preview.fields
+    .filter(
+      (field) =>
+        field.included &&
+        !field.deprecated &&
+        field.isKey
+    )
+    .map((field) => field.columnName)
+    .filter((column) => approvedColumns.has(column));
+
+  if (keyColumns.length === 0) {
+    throw new Error(
+      `Entity ${preview.entity.entityCode} has no compiler-approved key fields`
+    );
+  }
+
+  const missingKeyColumns = keyColumns.filter(
+    (column) => !keyValues[column]
+  );
+
+  if (missingKeyColumns.length > 0) {
+    throw new Error(
+      `Missing key values: ${missingKeyColumns.join(", ")}`
+    );
+  }
+
+  const schemaSql = quoteIdentifier(
+    preview.database.schemaName
+  );
+  const tableSql = quoteIdentifier(
+    preview.database.tableName
+  );
+
+  const selectedColumns = preview.fields
+    .filter(
+      (field) =>
+        field.included &&
+        !field.deprecated
+    )
+    .map((field) => field.columnName);
+
+  const columnSql = selectedColumns
+    .map(quoteIdentifier)
+    .join(", ");
+
+  const whereSql = keyColumns
+    .map(
+      (column, index) =>
+        `${quoteIdentifier(column)} = $${index + 1}`
+    )
+    .join(" AND ");
+
+  const parameters = keyColumns.map(
+    (column) => keyValues[column]
+  );
+
+  const result = await pool.query<Record<string, unknown>>(
+    `
+      SELECT ${columnSql}
+      FROM ${schemaSql}.${tableSql}
+      WHERE ${whereSql}
+      LIMIT 1
+    `,
+    parameters
+  );
+
+  return {
+    keyColumns,
+    row: result.rows[0] ?? null,
   };
 }
