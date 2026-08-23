@@ -40,14 +40,18 @@ export default async function EditEntityPage({
     }
   }
 
+  const hasAllKeyValues = keyColumns.every(
+    (column) => typeof keyValues[column] === "string"
+  );
+
+  if (!hasAllKeyValues) {
+    notFound();
+  }
+
   const record = await getEntityRecord(
     preview,
     keyValues
   );
-
-  if (!record.row) {
-    notFound();
-  }
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-8">
