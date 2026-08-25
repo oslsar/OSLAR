@@ -74,6 +74,19 @@ export type CompilerEntityBehavior = {
   allowExport: boolean;
 };
 
+export type CompilerPresentation = {
+  categoryCode: string;
+  categoryName: string;
+  description: string | null;
+  reservedRole: string | null;
+  backgroundClass: string | null;
+  borderClass: string | null;
+  textClass: string | null;
+  badgeClass: string | null;
+  legendLabel: string | null;
+  displayOrder: number | null;
+};
+
 export type CompilerControlType =
   | "text"
   | "number"
@@ -139,6 +152,7 @@ export type CompilerGuiField = {
   formatSpec: string | null;
   lookup: CompilerLookup | null;
   validation: CompilerValidation;
+  presentation: CompilerPresentation | null;
 };
 
 export type CompilerFormSection = {

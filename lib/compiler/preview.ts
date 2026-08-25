@@ -120,6 +120,7 @@ export async function buildEntityPreview(
     entityBehavior,
     relatedEntityBehaviors,
     physicalTable,
+    fieldPresentations,
   } = metadata;
 
   const activeFields = fields.filter(
@@ -303,6 +304,8 @@ export async function buildEntityPreview(
       columnSpan: field.behavior.columnSpan ?? 1,
       formatSpec: field.formatSpec,
       lookup,
+      presentation:
+        fieldPresentations[field.fieldDefId] ?? null,
       validation: inferValidation(
         field.formatSpec,
         required

@@ -23,6 +23,21 @@ type RelatedEntityBehaviorRow = {
   lookup_display_columns: string[] | null;
 };
 
+type FieldPresentationRow = {
+  field_def_id: string;
+  category_code: string;
+  category_name: string;
+  description: string | null;
+  reserved_role: string | null;
+  background_class: string | null;
+  border_class: string | null;
+  text_class: string | null;
+  badge_class: string | null;
+  legend_label: string | null;
+  display_order: number | null;
+  priority: number;
+};
+
 export async function getEntityMetadata(entityCode: string) {
   const normalizedCode = entityCode.trim().toUpperCase();
 
@@ -311,6 +326,59 @@ export async function getEntityMetadata(entityCode: string) {
     [normalizedCode]
   );
 
+  const fieldPresentationResult =
+    await pool.query<FieldPresentationRow>(
+      `
+        SELECT
+          fp.field_def_id::text,
+          pc.category_code,
+          pc.category_name,
+          pc.description,
+          pc.reserved_role,
+          pc.background_class,
+          pc.border_class,
+          pc.text_class,
+          pc.badge_class,
+          pc.legend_label,
+          pc.display_order,
+          fp.priority
+        FROM lsar_meta.field_presentation fp
+        JOIN lsar_meta.presentation_category pc
+          ON pc.category_code = fp.category_code
+         AND pc.active = true
+        WHERE fp.active = true
+          AND fp.field_def_id IN (
+            SELECT field_def_id
+            FROM lsar_meta.field_def
+            WHERE entity_code = $1
+          )
+        ORDER BY
+          fp.field_def_id,
+          fp.priority,
+          pc.display_order,
+          pc.category_code
+      `,
+      [entity.entity_code]
+    );
+
+  const fieldPresentations = Object.fromEntries(
+    fieldPresentationResult.rows.map((row) => [
+      row.field_def_id,
+      {
+        categoryCode: row.category_code,
+        categoryName: row.category_name,
+        description: row.description,
+        reservedRole: row.reserved_role,
+        backgroundClass: row.background_class,
+        borderClass: row.border_class,
+        textClass: row.text_class,
+        badgeClass: row.badge_class,
+        legendLabel: row.legend_label,
+        displayOrder: row.display_order,
+      },
+    ])
+  );
+
   return {
     entity,
     fields,
@@ -319,5 +387,6 @@ export async function getEntityMetadata(entityCode: string) {
     physicalTable: physicalResult.rows[0] ?? null,
     entityBehavior: entityBehaviorResult.rows[0] ?? null,
     relatedEntityBehaviors,
+    fieldPresentations,
   };
 }
