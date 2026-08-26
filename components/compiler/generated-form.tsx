@@ -116,6 +116,80 @@ function validateFieldValue(
   return null;
 }
 
+function presentationClasses(
+  field: CompilerGuiField,
+  hasValidationError: boolean
+): string {
+  if (hasValidationError) {
+    return "border-red-400 bg-red-50";
+  }
+
+  if (field.validation.required) {
+    return "border-red-300 bg-red-50/40";
+  }
+
+  switch (field.presentation?.categoryCode) {
+    case "SECONDARY":
+      return "border-orange-300 bg-orange-50/40";
+
+    case "USUAL":
+      return "border-blue-300 bg-blue-50/40";
+
+    case "SOMETIMES":
+      return "border-purple-300 bg-purple-50/40";
+
+    case "PHASE1":
+      return "border-green-300 bg-green-50/40";
+
+    case "PHASE2":
+      return "border-cyan-300 bg-cyan-50/40";
+
+    case "CUSTOMER":
+      return "border-indigo-300 bg-indigo-50/40";
+
+    case "REVIEW":
+      return "border-pink-300 bg-pink-50/40";
+
+    case "DERIVED":
+      return "border-slate-300 bg-slate-50";
+
+    case "SPECIAL":
+      return "border-teal-300 bg-teal-50/40";
+
+    default:
+      return "border-gray-200 bg-gray-50/40";
+  }
+}
+
+function presentationLegendClasses(
+  categoryCode: string
+): string {
+  switch (categoryCode) {
+    case "MANDATORY":
+      return "border-red-300 bg-red-50 text-red-900";
+    case "SECONDARY":
+      return "border-orange-300 bg-orange-50 text-orange-900";
+    case "USUAL":
+      return "border-blue-300 bg-blue-50 text-blue-900";
+    case "SOMETIMES":
+      return "border-purple-300 bg-purple-50 text-purple-900";
+    case "PHASE1":
+      return "border-green-300 bg-green-50 text-green-900";
+    case "PHASE2":
+      return "border-cyan-300 bg-cyan-50 text-cyan-900";
+    case "CUSTOMER":
+      return "border-indigo-300 bg-indigo-50 text-indigo-900";
+    case "REVIEW":
+      return "border-pink-300 bg-pink-50 text-pink-900";
+    case "DERIVED":
+      return "border-slate-300 bg-slate-50 text-slate-900";
+    case "SPECIAL":
+      return "border-teal-300 bg-teal-50 text-teal-900";
+    default:
+      return "border-gray-300 bg-gray-50 text-gray-900";
+  }
+}
+
 export default function GeneratedForm({
   entityCode,
   form,
@@ -157,6 +231,56 @@ export default function GeneratedForm({
     }
 
     return columns;
+  }, [form.sections]);
+
+  const presentationLegend = useMemo(() => {
+    const categories = new Map<
+      string,
+      {
+        categoryCode: string;
+        label: string;
+        displayOrder: number;
+      }
+    >();
+
+    let hasMandatory = false;
+
+    for (const section of form.sections) {
+      for (const field of section.fields) {
+        if (field.validation.required) {
+          hasMandatory = true;
+        }
+
+        if (
+          field.presentation &&
+          field.presentation.reservedRole === "custom"
+        ) {
+          categories.set(field.presentation.categoryCode, {
+            categoryCode: field.presentation.categoryCode,
+            label:
+              field.presentation.legendLabel ??
+              field.presentation.categoryName,
+            displayOrder:
+              field.presentation.displayOrder ??
+              Number.MAX_SAFE_INTEGER,
+          });
+        }
+      }
+    }
+
+    const items = [...categories.values()].sort(
+      (a, b) => a.displayOrder - b.displayOrder
+    );
+
+    if (hasMandatory) {
+      items.unshift({
+        categoryCode: "MANDATORY",
+        label: "Mandatory",
+        displayOrder: 10,
+      });
+    }
+
+    return items;
   }, [form.sections]);
 
   const [values, setValues] =
@@ -273,6 +397,25 @@ export default function GeneratedForm({
 
   return (
     <div className="mt-6 space-y-8">
+      {presentationLegend.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 bg-white p-3">
+          <span className="mr-1 text-xs font-medium text-gray-600">
+            Field guide:
+          </span>
+
+          {presentationLegend.map((item) => (
+            <span
+              key={item.categoryCode}
+              className={`rounded-md border px-2.5 py-1 text-xs font-medium ${presentationLegendClasses(
+                item.categoryCode
+              )}`}
+            >
+              {item.label}
+            </span>
+          ))}
+        </div>
+      )}
+
       {form.sections
         .filter((section) => section.fields.length > 0)
         .map((section) => (
@@ -303,6 +446,14 @@ export default function GeneratedForm({
                   values[field.columnName]
                 );
 
+               const fieldPresentationClasses = presentationClasses(
+                 field,
+                 Boolean(
+                   touched[field.columnName] &&
+                     validationError
+                 )
+               );
+
                 const effectiveReadOnly =
                   mode === "view"
                     ? true
@@ -319,11 +470,11 @@ export default function GeneratedForm({
 
                 return (
                   <div
-                  key={field.columnName}
-                  className={`rounded-md border border-gray-200 bg-gray-50/40 p-3 ${gridClassForSpan(
-                    field.columnSpan
-                  )}`}
-                >
+                    key={field.columnName}
+                    className={`rounded-md border p-3 ${fieldPresentationClasses} ${gridClassForSpan(
+                      field.columnSpan
+                    )}`}
+                  >
                   <div className="flex items-start justify-between gap-3">
                     <label className="text-sm font-medium text-gray-900">
                       {field.label}
