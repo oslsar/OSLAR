@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buildEntityPreview } from "@/lib/compiler/preview";
 import { getEntityRecord } from "@/lib/compiler/data";
+import GeneratedForm from "@/components/compiler/generated-form";
 
 export const dynamic = "force-dynamic";
 
@@ -74,27 +75,22 @@ export default async function EditEntityPage({
         </p>
       </div>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5">
-        <dl className="grid gap-4 md:grid-cols-2">
-          {preview.gui.generatedFields.map((field) => (
-            <div
-              key={field.columnName}
-              className="rounded-md border border-gray-100 p-3"
-            >
-              <dt className="text-sm font-medium text-gray-900">
-                {field.label}
-              </dt>
+      <section className="mt-8">
+        <h2 className="text-xl font-semibold text-gray-950">
+          Edit record
+        </h2>
 
-              <dd className="mt-1 text-sm text-gray-700">
-                {formatValue(record.row?.[field.columnName])}
-              </dd>
+        <p className="mt-1 text-sm text-gray-600">
+          Generated from compiler metadata. Primary-key fields are read-only.
+        </p>
 
-              <div className="mt-1 text-xs text-gray-400">
-                {field.columnName}
-              </div>
-            </div>
-          ))}
-        </dl>
+        <GeneratedForm
+          entityCode={preview.entity.entityCode}
+          form={preview.gui.form}
+          mode="edit"
+          initialValues={record.row ?? undefined}
+          keyColumns={record.keyColumns}
+        />
       </section>
     </main>
   );

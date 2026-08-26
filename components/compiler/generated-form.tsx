@@ -14,6 +14,8 @@ type GeneratedFormProps = {
   entityCode: string;
   form: CompilerForm;
   mode?: GeneratedFormMode;
+  initialValues?: Record<string, unknown>;
+  keyColumns?: string[];
 };
 
 function gridClassForColumns(columnCount: number): string {
@@ -118,6 +120,8 @@ export default function GeneratedForm({
   entityCode,
   form,
   mode = "view",
+  initialValues: suppliedInitialValues,
+  keyColumns = [],
 }: GeneratedFormProps) {
   const router = useRouter();
 
@@ -126,12 +130,13 @@ export default function GeneratedForm({
 
     for (const section of form.sections) {
       for (const field of section.fields) {
-        values[field.columnName] = "";
+        values[field.columnName] =
+          suppliedInitialValues?.[field.columnName] ?? "";
       }
     }
 
     return values;
-  }, [form.sections]);
+  }, [form.sections, suppliedInitialValues]);
 
   const lookupCompanionColumns = useMemo(() => {
     const columns = new Set<string>();
@@ -301,11 +306,16 @@ export default function GeneratedForm({
                 const effectiveReadOnly =
                   mode === "view"
                     ? true
-                    : mode === "create"
-                      ? lookupCompanionColumns.has(field.columnName)
-                        ? true
-                        : field.readOnly && !field.validation.required
-                      : field.readOnly;
+                    : mode === "edit"
+                      ? (
+                          keyColumns.includes(field.columnName) ||
+                          field.readOnly
+                        )
+                      : mode === "create"
+                        ? lookupCompanionColumns.has(field.columnName)
+                          ? true
+                          : field.readOnly && !field.validation.required
+                        : field.readOnly;
 
                 return (
                   <div
