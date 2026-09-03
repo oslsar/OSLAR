@@ -340,7 +340,7 @@ export default function GeneratedForm({
   }
 
   async function handleSubmit() {
-    if (mode !== "create") {
+    if (mode === "view") {
       return;
     }
 
@@ -349,34 +349,75 @@ export default function GeneratedForm({
     setSubmitSuccess(null);
 
     try {
+      const endpoint =
+        `/api/compiler/entities/${encodeURIComponent(entityCode)}`;
+
+      const originalKeyValues =
+        mode === "edit"
+          ? Object.fromEntries(
+              keyColumns.map((column) => [
+                column,
+                initialValues[column],
+              ])
+            )
+          : null;
+
       const response = await fetch(
-        `/api/compiler/entities/${encodeURIComponent(entityCode)}`,
+        endpoint,
         {
-          method: "POST",
+          method:
+            mode === "edit"
+              ? "PATCH"
+              : "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(values),
+          body: JSON.stringify(
+            mode === "edit"
+              ? {
+                  keys: originalKeyValues,
+                  values,
+                }
+              : values
+          ),
         }
       );
 
       const result = await response.json();
 
       if (!response.ok) {
-        if (Array.isArray(result.errors) && result.errors.length > 0) {
+        if (
+          Array.isArray(result.errors) &&
+          result.errors.length > 0
+        ) {
           setSubmitError(
             result.errors
-              .map((error: { message?: string }) =>
-                error.message ?? "Validation error"
+              .map(
+                (error: { message?: string }) =>
+                  error.message ??
+                  "Validation error"
               )
               .join(" ")
           );
         } else {
           setSubmitError(
-            result.error ?? "Unable to create record."
+            result.error ??
+              (mode === "edit"
+                ? "Unable to update record."
+                : "Unable to create record.")
           );
         }
 
+        return;
+      }
+
+      if (mode === "edit") {
+        setSubmitSuccess(
+          `${entityCode} record updated successfully.`
+        );
+
+        setTouched({});
+        router.refresh();
         return;
       }
 
@@ -388,8 +429,18 @@ export default function GeneratedForm({
       setTouched({});
       router.refresh();
     } catch (error) {
-      console.error("Create request failed:", error);
-      setSubmitError("Unable to create record.");
+      console.error(
+        mode === "edit"
+          ? "Update request failed:"
+          : "Create request failed:",
+        error
+      );
+
+      setSubmitError(
+        mode === "edit"
+          ? "Unable to update record."
+          : "Unable to create record."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -589,7 +640,7 @@ export default function GeneratedForm({
           </section>
         ))}
 
-      {mode === "create" && (
+      {(mode === "create" || mode === "edit") && (
         <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-5">
           <div className="flex items-center gap-3">
             <button
@@ -598,7 +649,13 @@ export default function GeneratedForm({
               disabled={submitting}
               className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {submitting ? "Creating..." : "Create record"}
+              {submitting
+                ? mode === "edit"
+                  ? "Saving..."
+                  : "Creating..."
+                : mode === "edit"
+                  ? "Save changes"
+                  : "Create record"}
             </button>
           </div>
 
