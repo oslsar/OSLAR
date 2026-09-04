@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { buildEntityPreview } from "@/lib/compiler/preview";
 import { getEntityRows } from "@/lib/compiler/data";
 import GeneratedForm from "@/components/compiler/generated-form";
+import DeleteRecordButton from "@/components/compiler/delete-record-button";
 
 export const dynamic = "force-dynamic";
 
@@ -122,6 +123,16 @@ export default async function EntityPage({
                     </th>
                   );
                 })}
+
+                {(
+                  preview.behavior?.allowEdit ||
+                  preview.behavior?.allowDelete
+                ) &&
+                  data.keyColumns.length > 0 && (
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-semibold text-gray-700">
+                      Actions
+                    </th>
+                  )}
               </tr>
             </thead>
 
@@ -132,7 +143,10 @@ export default async function EntityPage({
                     colSpan={Math.max(
                       data.columns.length +
                         (
-                          preview.behavior?.allowEdit &&
+                          (
+                            preview.behavior?.allowEdit ||
+                            preview.behavior?.allowDelete
+                          ) &&
                           data.keyColumns.length > 0
                             ? 1
                             : 0
@@ -156,19 +170,34 @@ export default async function EntityPage({
                       </td>
                     ))}
 
-                    {preview.behavior?.allowEdit &&
+                    {(
+                      preview.behavior?.allowEdit ||
+                      preview.behavior?.allowDelete
+                    ) &&
                       data.keyColumns.length > 0 && (
                         <td className="whitespace-nowrap px-4 py-3">
-                          <Link
-                            href={buildEditHref(
-                              preview.entity.entityCode,
-                              data.keyColumns,
-                              row
+                          <div className="flex items-center gap-3">
+                            {preview.behavior?.allowEdit && (
+                              <Link
+                                href={buildEditHref(
+                                  preview.entity.entityCode,
+                                  data.keyColumns,
+                                  row
+                                )}
+                                className="text-sm font-medium text-blue-700 no-underline hover:underline"
+                              >
+                                Edit
+                              </Link>
                             )}
-                            className="text-sm font-medium text-blue-700 no-underline hover:underline"
-                          >
-                            Edit
-                          </Link>
+
+                            {preview.behavior?.allowDelete && (
+                              <DeleteRecordButton
+                                entityCode={preview.entity.entityCode}
+                                keyColumns={data.keyColumns}
+                                row={row}
+                              />
+                            )}
+                          </div>
                         </td>
                       )}
                   </tr>
