@@ -54,6 +54,25 @@ function stringValue(value: unknown): string {
   return String(value);
 }
 
+function valuesAreEquivalent(
+  currentValue: unknown,
+  initialValue: unknown
+): boolean {
+  const normalize = (value: unknown): unknown => {
+    if (value === null || value === undefined) {
+      return "";
+    }
+
+    if (typeof value === "string") {
+      return value;
+    }
+
+    return value;
+  };
+
+  return normalize(currentValue) === normalize(initialValue);
+}
+
 function stepForScale(
   scale: number | null
 ): string | undefined {
@@ -362,6 +381,28 @@ export default function GeneratedForm({
             )
           : null;
 
+      const changedValues =
+        mode === "edit"
+          ? Object.fromEntries(
+              Object.entries(values).filter(
+                ([columnName, value]) =>
+                  !keyColumns.includes(columnName) &&
+                  !valuesAreEquivalent(
+                    value,
+                    initialValues[columnName]
+                  )
+              )
+            )
+          : values;
+
+      if (
+        mode === "edit" &&
+        Object.keys(changedValues).length === 0
+      ) {
+        setSubmitSuccess("No changes to save.");
+        return;
+      }
+
       const response = await fetch(
         endpoint,
         {
@@ -376,7 +417,7 @@ export default function GeneratedForm({
             mode === "edit"
               ? {
                   keys: originalKeyValues,
-                  values,
+                  values: changedValues,
                 }
               : values
           ),

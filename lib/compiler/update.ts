@@ -3,6 +3,7 @@ import { buildEntityPreview } from "@/lib/compiler/preview";
 import { validateEntityPayload } from "@/lib/compiler/validation";
 import { coerceEntityPayload } from "@/lib/compiler/coercion";
 import { validateForeignKeys } from "@/lib/compiler/foreign-keys";
+import { getEntityRecord } from "@/lib/compiler/data";
 
 export type CompilerUpdateResult =
   | {
@@ -122,9 +123,33 @@ export async function updateEntityRecord(
     }
   }
 
+  const record = await getEntityRecord(
+    preview,
+    Object.fromEntries(
+      keyColumns.map((column) => [
+        column,
+        String(keyValues[column]),
+      ])
+    )
+  );
+
+  if (!record.row) {
+    return {
+      ok: false,
+      status: 404,
+      stage: "database",
+      error: "Record not found.",
+    };
+  }
+
+  const mergedPayload: Record<string, unknown> = {
+    ...record.row,
+    ...payload,
+  };
+
   const validation = validateEntityPayload(
     preview,
-    payload
+    mergedPayload
   );
 
   if (!validation.valid) {
@@ -139,7 +164,7 @@ export async function updateEntityRecord(
 
   const coercion = coerceEntityPayload(
     preview,
-    payload
+    mergedPayload
   );
 
   if (!coercion.valid) {
@@ -177,11 +202,14 @@ export async function updateEntityRecord(
       .map((field) => field.columnName)
   );
 
-  const entries = Object.entries(
-    coercion.values
-  ).filter(([columnName]) =>
-    editableColumns.has(columnName)
-  );
+  const entries = Object.keys(payload)
+    .filter((columnName) =>
+      editableColumns.has(columnName)
+    )
+    .map((columnName) => [
+      columnName,
+      coercion.values[columnName],
+    ] as [string, unknown]);
 
   if (entries.length === 0) {
     return {
