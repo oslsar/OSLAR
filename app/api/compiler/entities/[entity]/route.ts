@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createEntityRecord } from "@/lib/compiler/create";
 import { updateEntityRecord } from "@/lib/compiler/update";
+import { deleteEntityRecord } from "@/lib/compiler/delete";
 
 export const dynamic = "force-dynamic";
 
@@ -134,6 +135,72 @@ export async function PATCH(
       {
         ok: false,
         error: "Unable to update entity record",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  context: {
+    params: Promise<{ entity: string }>;
+  }
+) {
+  try {
+    const { entity } = await context.params;
+    const body: unknown = await request.json();
+
+    if (
+      typeof body !== "object" ||
+      body === null ||
+      Array.isArray(body)
+    ) {
+      return NextResponse.json(
+        {
+          error: "Request body must be a JSON object",
+        },
+        { status: 400 }
+      );
+    }
+
+    const requestBody =
+      body as Record<string, unknown>;
+
+    const keyValues = requestBody.keys;
+
+    if (
+      typeof keyValues !== "object" ||
+      keyValues === null ||
+      Array.isArray(keyValues)
+    ) {
+      return NextResponse.json(
+        {
+          error: "keys must be a JSON object",
+        },
+        { status: 400 }
+      );
+    }
+
+    const result = await deleteEntityRecord(
+      entity,
+      keyValues as Record<string, unknown>
+    );
+
+    return NextResponse.json(
+      result,
+      { status: result.status }
+    );
+  } catch (error) {
+    console.error(
+      "Compiler delete failed:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Unable to delete entity record",
       },
       { status: 500 }
     );
