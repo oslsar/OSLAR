@@ -560,6 +560,11 @@ export default function GeneratedForm({
                           : field.readOnly && !field.validation.required
                         : field.readOnly;
 
+                const displayLabel =
+                  field.lookup?.composite
+                    ? field.lookup.parentLabel
+                    : field.label;
+
                 return (
                   <div
                     key={field.columnName}
@@ -569,7 +574,7 @@ export default function GeneratedForm({
                   >
                   <div className="flex items-start justify-between gap-3">
                     <label className="text-sm font-medium text-gray-900">
-                      {field.label}
+                      {displayLabel}
                       {field.validation.required && (
                         <span className="ml-1 text-red-600">*</span>
                       )}
@@ -610,7 +615,7 @@ export default function GeneratedForm({
                       required={field.validation.required}
                       placeholder={
                         field.placeholder ??
-                        `Select ${field.label.toLowerCase()}`
+                        `Select ${displayLabel.toLowerCase()}`
                       }
                       onChange={(selectedKey) => {
                         applyLookupSelection(field, selectedKey);

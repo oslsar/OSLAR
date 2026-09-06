@@ -51,6 +51,7 @@ export type CompilerRelationship = {
 export type CompilerLookup = {
   relationshipId: string;
   parentEntityCode: string;
+  parentLabel: string;
   foreignKeyColumns: string[];
   primaryKeyColumns: string[];
   displayColumns: string[];

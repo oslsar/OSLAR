@@ -20,6 +20,7 @@ type PhysicalTableRow = {
 
 type RelatedEntityBehaviorRow = {
   entity_code: string;
+  navigation_label: string | null;
   lookup_display_columns: string[] | null;
 };
 
@@ -288,6 +289,7 @@ export async function getEntityMetadata(entityCode: string) {
           `
           SELECT
             entity_code,
+            navigation_label,
             lookup_display_columns
           FROM lsar_meta.entity_behavior
           WHERE entity_code = ANY($1::text[])
@@ -301,6 +303,7 @@ export async function getEntityMetadata(entityCode: string) {
     relatedEntityBehaviorResult.rows.map((row) => [
       row.entity_code,
       {
+        navigationLabel: row.navigation_label,
         lookupDisplayColumns: row.lookup_display_columns,
       },
     ])

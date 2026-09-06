@@ -258,6 +258,11 @@ export async function buildEntityPreview(
           relationshipId: lookupRelationship.relationshipId,
           parentEntityCode:
             lookupRelationship.parentEntityCode,
+          parentLabel:
+            relatedEntityBehaviors[
+              lookupRelationship.parentEntityCode
+            ]?.navigationLabel ??
+            lookupRelationship.parentEntityCode,
           foreignKeyColumns:
             lookupRelationship.foreignKeyColumns,
           primaryKeyColumns:
