@@ -42,6 +42,7 @@ export type CompilerRelationship = {
   childEntityCode: string;
   parentEntityCode: string;
   constraintName: string | null;
+  relationshipLabel: string | null;
   relationshipType: string;
   foreignKeyColumns: string[];
   primaryKeyColumns: string[];
