@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import LookupField from "@/components/compiler/lookup-field";
 import type {
@@ -17,6 +17,62 @@ type GeneratedFormProps = {
   initialValues?: Record<string, unknown>;
   keyColumns?: string[];
 };
+
+type CompilerFormSection = CompilerForm["sections"][number];
+
+function FormSectionFrame({
+  section,
+  children,
+}: {
+  section: CompilerFormSection;
+  children: ReactNode;
+}) {
+  const className =
+    "rounded-lg border border-gray-200 bg-white p-5";
+
+  if (section.collapsible) {
+    return (
+      <details
+        open={!section.initiallyCollapsed}
+        className={className}
+      >
+        <summary className="cursor-pointer select-none">
+          <span className="ml-2 inline-block align-top">
+            <span className="block text-lg font-semibold text-gray-950">
+              {section.sectionName}
+            </span>
+
+            {section.description && (
+              <span className="mt-1 block text-sm font-normal text-gray-600">
+                {section.description}
+              </span>
+            )}
+          </span>
+        </summary>
+
+        {children}
+      </details>
+    );
+  }
+
+  return (
+    <section className={className}>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-950">
+          {section.sectionName}
+        </h3>
+
+        {section.description && (
+          <p className="mt-1 text-sm text-gray-600">
+            {section.description}
+          </p>
+        )}
+      </div>
+
+      {children}
+    </section>
+  );
+}
 
 function gridClassForColumns(columnCount: number): string {
   switch (columnCount) {
@@ -511,22 +567,10 @@ export default function GeneratedForm({
       {form.sections
         .filter((section) => section.fields.length > 0)
         .map((section) => (
-          <section
+          <FormSectionFrame
             key={section.sectionCode}
-            className="rounded-lg border border-gray-200 bg-white p-5"
+            section={section}
           >
-            <div>
-              <h3 className="text-lg font-semibold text-gray-950">
-                {section.sectionName}
-              </h3>
-
-              {section.description && (
-                <p className="mt-1 text-sm text-gray-600">
-                  {section.description}
-                </p>
-              )}
-            </div>
-
             <div
               className={`mt-5 grid gap-4 ${gridClassForColumns(
                 section.columnCount
@@ -683,7 +727,7 @@ export default function GeneratedForm({
              );
            })}
             </div>
-          </section>
+          </FormSectionFrame>
         ))}
 
       {(mode === "create" || mode === "edit") && (
