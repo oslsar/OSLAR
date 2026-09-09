@@ -666,6 +666,23 @@ export default function GeneratedForm({
                         markTouched(field.columnName);
                       }}
                     />
+                  ) : field.controlType === "boolean" ? (
+                    <label className="mt-3 flex items-center gap-2 text-sm text-gray-900">
+                      <input
+                        type="checkbox"
+                        disabled={effectiveReadOnly}
+                        checked={values[field.columnName] === true}
+                        onChange={(event) =>
+                          setFieldValue(
+                            field.columnName,
+                            event.target.checked
+                          )
+                        }
+                        onBlur={() => markTouched(field.columnName)}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      <span>Yes</span>
+                    </label>
                   ) : (
                     <input
                       type={
