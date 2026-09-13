@@ -223,7 +223,9 @@ export async function buildEntityPreview(
   const outgoingRelationships = relationships.filter(
     (relationship) =>
       relationship.active &&
-      relationship.relationshipType === "foreign_key" &&
+      ["foreign_key", "reference_lookup"].includes(
+        relationship.relationshipType
+      ) &&
       relationship.childEntityCode === entity.entity_code
   );
 

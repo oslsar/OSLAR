@@ -278,7 +278,9 @@ export async function getEntityMetadata(entityCode: string) {
         .filter(
           (relationship) =>
             relationship.active &&
-            relationship.relationshipType === "foreign_key" &&
+            ["foreign_key", "reference_lookup"].includes(
+              relationship.relationshipType
+            ) &&
             relationship.childEntityCode === entity.entity_code
         )
         .map((relationship) => relationship.parentEntityCode)
