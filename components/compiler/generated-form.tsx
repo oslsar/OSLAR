@@ -683,6 +683,32 @@ export default function GeneratedForm({
                       />
                       <span>Yes</span>
                     </label>
+                  ) : field.controlType === "textarea" ? (
+                    <textarea
+                      disabled={effectiveReadOnly}
+                      required={field.validation.required}
+                      value={stringValue(
+                        values[field.columnName]
+                      )}
+                      onChange={(event) =>
+                        setFieldValue(
+                          field.columnName,
+                          event.target.value
+                        )
+                      }
+                      onBlur={() => markTouched(field.columnName)}
+                      placeholder={
+                        field.placeholder ??
+                        (effectiveReadOnly
+                          ? "Read-only"
+                          : `Enter ${field.label.toLowerCase()}`)
+                      }
+                      maxLength={
+                        field.validation.maxLength ?? undefined
+                      }
+                      rows={4}
+                      className="mt-3 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
+                    />
                   ) : (
                     <input
                       type={
