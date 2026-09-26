@@ -30,6 +30,7 @@ export async function GET(
     const result = await getLookupItems(entity, {
       query: url.searchParams.get("q"),
       limit: parseLimit(url.searchParams.get("limit")),
+      relationshipId: url.searchParams.get("relationshipId"),
     });
 
     if (!result) {

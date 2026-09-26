@@ -46,7 +46,14 @@ export type CompilerRelationship = {
   relationshipType: string;
   foreignKeyColumns: string[];
   primaryKeyColumns: string[];
+  lookupFilter: CompilerLookupFilter | null;
   active: boolean;
+};
+
+export type CompilerLookupFilter = {
+  column: string;
+  operator: "in";
+  values: Array<string | number | boolean>;
 };
 
 export type CompilerLookup = {

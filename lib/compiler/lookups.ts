@@ -95,6 +95,7 @@ export async function getLookupItems(
   options?: {
     query?: string | null;
     limit?: number;
+    relationshipId?: string | null;
   }
 ): Promise<CompilerLookupResult | null> {
   const preview = await buildEntityPreview(entityCode);
@@ -106,6 +107,8 @@ export async function getLookupItems(
   const requestedLimit = options?.limit ?? 25;
   const limit = Math.min(Math.max(requestedLimit, 1), 100);
   const query = options?.query?.trim() || null;
+  const relationshipId =
+    options?.relationshipId?.trim() || null;
 
   const approvedColumns = new Set(
     preview.fields
@@ -117,6 +120,28 @@ export async function getLookupItems(
       )
       .map((field) => field.columnName)
   );
+
+  const lookupRelationship = relationshipId
+    ? preview.relationships.find(
+      (relationship) =>
+        relationship.relationshipId === relationshipId &&
+        relationship.active &&
+        relationship.parentEntityCode ===
+          preview.entity.entityCode &&
+        ["foreign_key", "reference_lookup"].includes(
+          relationship.relationshipType
+        )
+    )
+  : null;
+
+  if (relationshipId && !lookupRelationship) {
+    throw new Error(
+      `Lookup relationship ${relationshipId} is not valid for ${preview.entity.entityCode}`
+    );
+  }
+
+  const lookupFilter =
+    lookupRelationship?.lookupFilter ?? null;
 
   const physicalPrimaryKeyColumns =
     await getPhysicalPrimaryKeyColumns(preview);
@@ -197,20 +222,64 @@ export async function getLookupItems(
     .join(", ");
 
   const parameters: unknown[] = [];
-  let whereSql = "";
+  const whereConditions: string[] = [];
+
+  if (lookupFilter) {
+    if (!approvedColumns.has(lookupFilter.column)) {
+      throw new Error(
+        `Lookup filter column ${lookupFilter.column} is not approved for ${preview.entity.entityCode}`
+      );
+    }
+
+    if (lookupFilter.operator !== "in") {
+      throw new Error(
+        `Unsupported lookup filter operator: ${lookupFilter.operator}`
+      );
+    }
+
+    if (
+      !Array.isArray(lookupFilter.values) ||
+      lookupFilter.values.length === 0
+    ) {
+      throw new Error(
+        `Lookup filter for relationship ${relationshipId} has no values`
+      );
+    }
+
+    const filterParameters = lookupFilter.values.map(
+      (value) => {
+        parameters.push(value);
+        return `$${parameters.length}`;
+      }
+    );
+
+    whereConditions.push(
+      `${quoteIdentifier(lookupFilter.column)} IN (${filterParameters.join(
+        ", "
+      )})`
+    );
+  }
 
   if (query && searchColumns.length > 0) {
     parameters.push(`%${query}%`);
+    const queryParameter = `$${parameters.length}`;
 
     const searchSql = searchColumns
       .map(
         (column) =>
-          `${quoteIdentifier(column)}::text ILIKE $1`
+          `${quoteIdentifier(
+            column
+          )}::text ILIKE ${queryParameter}`
       )
       .join(" OR ");
 
-    whereSql = `WHERE (${searchSql})`;
+    whereConditions.push(`(${searchSql})`);
   }
+
+  const whereSql =
+    whereConditions.length > 0
+      ? `WHERE ${whereConditions.join(" AND ")}`
+      : "";
 
   parameters.push(limit);
   const limitParameter = `$${parameters.length}`;

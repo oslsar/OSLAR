@@ -75,6 +75,7 @@ export default function LookupField({
       try {
         const params = new URLSearchParams({
           limit: "25",
+          relationshipId: lookup.relationshipId,
         });
 
         const trimmedQuery = query.trim();
@@ -123,7 +124,12 @@ export default function LookupField({
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [disabled, lookup.parentEntityCode, query]);
+  }, [
+    disabled,
+    lookup.parentEntityCode,
+    lookup.relationshipId,
+    query,
+  ]);
 
   const selectedLabel = useMemo(() => {
     const selectedItem = items.find((item) =>

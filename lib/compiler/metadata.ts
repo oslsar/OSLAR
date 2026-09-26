@@ -250,6 +250,7 @@ export async function getEntityMetadata(entityCode: string) {
         relationship_type,
         fk_columns,
         pk_columns,
+        lookup_filter,
         active
       FROM lsar_meta.entity_relationship
       WHERE child_entity_code = $1
@@ -269,6 +270,7 @@ export async function getEntityMetadata(entityCode: string) {
       relationshipType: row.relationship_type,
       foreignKeyColumns: row.fk_columns,
       primaryKeyColumns: row.pk_columns,
+      lookupFilter: row.lookup_filter,
       active: row.active,
     }));
 
