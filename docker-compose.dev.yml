@@ -2,6 +2,7 @@ services:
   postgres:
     image: postgres:18
     container_name: oslar-dev-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: open_lsar
       POSTGRES_USER: postgres
