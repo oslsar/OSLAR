@@ -288,6 +288,15 @@ export default function GeneratedForm({
   }, [form.sections, suppliedInitialValues]);
 
   const lookupCompanionColumns = useMemo(() => {
+    // Identify every field that hosts a lookup.
+    const lookupAnchors = new Set(
+      form.sections.flatMap((section) =>
+        section.fields
+          .filter((field) => field.lookup !== null)
+          .map((field) => field.columnName)
+      )
+    );
+
     const columns = new Set<string>();
 
     for (const section of form.sections) {
@@ -296,11 +305,13 @@ export default function GeneratedForm({
           continue;
         }
 
-        for (
-          const columnName of
-          field.lookup.foreignKeyColumns.slice(1)
-        ) {
-          columns.add(columnName);
+        for (const columnName of field.lookup.foreignKeyColumns) {
+          if (
+            columnName !== field.columnName &&
+            !lookupAnchors.has(columnName)
+          ) {
+            columns.add(columnName);
+          }
         }
       }
     }
@@ -389,26 +400,71 @@ export default function GeneratedForm({
     field: CompilerGuiField,
     selectedKey: Record<string, unknown>
   ) {
-    if (!field.lookup) {
+    const selectedLookup = field.lookup;
+
+    if (!selectedLookup) {
       return;
     }
 
     setValues((current) => {
       const next = { ...current };
 
-      field.lookup?.foreignKeyColumns.forEach(
+      // Populate fields from the selected parent.
+      selectedLookup.foreignKeyColumns.forEach(
         (foreignColumn, index) => {
           const primaryColumn =
-            field.lookup?.primaryKeyColumns[index];
+            selectedLookup.primaryKeyColumns[index];
 
-          if (!primaryColumn) {
-            return;
+          if (primaryColumn) {
+            next[foreignColumn] =
+              selectedKey[primaryColumn] ?? null;
           }
-
-          next[foreignColumn] =
-            selectedKey[primaryColumn] ?? null;
         }
       );
+
+      // Clear dependent lookups when their parent context changes.
+      for (const section of form.sections) {
+        for (const dependentField of section.fields) {
+          const dependentLookup = dependentField.lookup;
+          const sourceColumn =
+            dependentLookup?.contextSourceColumn;
+
+          if (
+            !dependentLookup ||
+            !sourceColumn ||
+            dependentLookup.relationshipId ===
+              selectedLookup.relationshipId ||
+            !selectedLookup.foreignKeyColumns.includes(sourceColumn)
+          ) {
+            continue;
+          }
+
+          const previousContext =
+            String(current[sourceColumn] ?? "");
+
+          const newContext =
+            String(next[sourceColumn] ?? "");
+
+          if (previousContext === newContext) {
+            continue;
+          }
+
+          // Preserve shared parent fields, but clear the
+          // dependent lookup's own selection.
+          for (
+            const foreignColumn of
+            dependentLookup.foreignKeyColumns
+          ) {
+            if (
+              !selectedLookup.foreignKeyColumns.includes(
+                foreignColumn
+              )
+            ) {
+              next[foreignColumn] = "";
+            }
+          }
+        }
+      }
 
       return next;
     });
@@ -640,7 +696,29 @@ export default function GeneratedForm({
                   field.lookup ? (
                     <LookupField
                       lookup={field.lookup}
-	              disabled={mode === "view"}
+                      contextValue={
+                        field.lookup.contextSourceColumn
+                          ? String(
+                              values[field.lookup.contextSourceColumn] ?? ""
+                            )
+                          : null
+                      }
+                  disabled={
+                    mode === "view" ||
+                    (
+                      mode === "edit" &&
+                      (
+                        keyColumns.includes(field.columnName) ||
+                        field.readOnly
+                      )
+                    ) ||
+                    Boolean(
+                      field.lookup.contextSourceColumn &&
+                      !String(
+                        values[field.lookup.contextSourceColumn] ?? ""
+                      ).trim()
+                    )
+                  }
                       value={Object.fromEntries(
                         field.lookup.primaryKeyColumns.map(
                           (primaryColumn, index) => {

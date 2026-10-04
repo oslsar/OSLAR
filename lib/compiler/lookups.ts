@@ -96,6 +96,7 @@ export async function getLookupItems(
     query?: string | null;
     limit?: number;
     relationshipId?: string | null;
+    contextValue?: string | null;
   }
 ): Promise<CompilerLookupResult | null> {
   const preview = await buildEntityPreview(entityCode);
@@ -231,33 +232,62 @@ export async function getLookupItems(
       );
     }
 
-    if (lookupFilter.operator !== "in") {
-      throw new Error(
-        `Unsupported lookup filter operator: ${lookupFilter.operator}`
-      );
-    }
+    if (lookupFilter.operator === "in") {
+      if (
+        !Array.isArray(lookupFilter.values) ||
+        lookupFilter.values.length === 0
+      ) {
+        throw new Error(
+          `Lookup filter for relationship ${relationshipId} has no values`
+        );
+      }
 
-    if (
-      !Array.isArray(lookupFilter.values) ||
-      lookupFilter.values.length === 0
-    ) {
-      throw new Error(
-        `Lookup filter for relationship ${relationshipId} has no values`
-      );
-    }
-
-    const filterParameters = lookupFilter.values.map(
-      (value) => {
+      const filterParameters = lookupFilter.values.map((value) => {
         parameters.push(value);
         return `$${parameters.length}`;
-      }
-    );
+      });
 
-    whereConditions.push(
-      `${quoteIdentifier(lookupFilter.column)} IN (${filterParameters.join(
-        ", "
-      )})`
-    );
+      whereConditions.push(
+        `${quoteIdentifier(lookupFilter.column)} IN (${filterParameters.join(", ")})`
+      );
+    } else if (lookupFilter.operator === "eq_context") {
+      if (!lookupRelationship) {
+        throw new Error(
+          "A context filter requires an active lookup relationship."
+        );
+      }
+
+      const contextIndex =
+        lookupRelationship.foreignKeyColumns.indexOf(
+          lookupFilter.sourceColumn
+        );
+
+      if (
+        contextIndex < 0 ||
+        lookupRelationship.primaryKeyColumns[contextIndex] !==
+          lookupFilter.column
+      ) {
+        throw new Error(
+          `Invalid context mapping for relationship ${relationshipId}`
+        );
+      }
+
+      const contextValue = options?.contextValue?.trim();
+
+      if (!contextValue) {
+        // Never return an unfiltered list when required
+        // parent context has not been supplied.
+        whereConditions.push("FALSE");
+      } else {
+        parameters.push(contextValue);
+
+        whereConditions.push(
+          `${quoteIdentifier(lookupFilter.column)} = $${parameters.length}`
+        );
+      }
+    } else {
+      throw new Error("Unsupported lookup filter operator.");
+    }
   }
 
   if (query && searchColumns.length > 0) {

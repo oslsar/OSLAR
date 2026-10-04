@@ -229,12 +229,31 @@ export async function buildEntityPreview(
       relationship.childEntityCode === entity.entity_code
   );
 
+  const lookupAnchorColumns = new Set(
+    outgoingRelationships
+      .map(
+        (relationship) =>
+          relationship.lookupAnchorColumn ??
+          relationship.foreignKeyColumns[0]
+      )
+      .filter(
+        (columnName): columnName is string =>
+          typeof columnName === "string"
+      )
+  );
+
   const compositeLookupCompanionColumns = new Set(
-    outgoingRelationships.flatMap((relationship) =>
-      relationship.foreignKeyColumns.length > 1
-        ? relationship.foreignKeyColumns.slice(1)
-        : []
-    )
+    outgoingRelationships.flatMap((relationship) => {
+      const anchorColumn =
+        relationship.lookupAnchorColumn ??
+        relationship.foreignKeyColumns[0];
+
+      return relationship.foreignKeyColumns.filter(
+        (columnName) =>
+          columnName !== anchorColumn &&
+          !lookupAnchorColumns.has(columnName)
+      );
+    })
   );
 
   const configuredDefaultSort =
@@ -252,7 +271,10 @@ export async function buildEntityPreview(
   const generatedFields = orderedFields.map((field) => {
     const lookupRelationship = outgoingRelationships.find(
       (relationship) =>
-        relationship.foreignKeyColumns[0] === field.columnName
+        (
+          relationship.lookupAnchorColumn ??
+          relationship.foreignKeyColumns[0]
+        ) === field.columnName
     );
 
     const lookup = lookupRelationship
@@ -277,6 +299,10 @@ export async function buildEntityPreview(
             lookupRelationship.primaryKeyColumns,
           composite:
             lookupRelationship.foreignKeyColumns.length > 1,
+            contextSourceColumn:
+              lookupRelationship.lookupFilter?.operator === "eq_context"
+                ? lookupRelationship.lookupFilter.sourceColumn
+                : null,
         }
       : null;
 

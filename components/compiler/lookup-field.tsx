@@ -26,6 +26,7 @@ type LookupFieldProps = {
   required?: boolean;
   placeholder?: string;
   onChange?: (value: Record<string, unknown>) => void;
+  contextValue?: string | null;
 };
 
 function serializeKey(key: Record<string, unknown>): string {
@@ -50,6 +51,7 @@ export default function LookupField({
   required = false,
   placeholder = "Search or select a value",
   onChange,
+  contextValue = null,
 }: LookupFieldProps) {
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<LookupItem[]>([]);
@@ -63,7 +65,15 @@ export default function LookupField({
   }, [value]);
 
   useEffect(() => {
-    if (disabled) {
+    setItems([]);
+
+    const effectiveContext = contextValue?.trim() ?? "";
+
+    if (
+      disabled ||
+      (lookup.contextSourceColumn && !effectiveContext)
+    ) {
+      setLoading(false);
       return;
     }
 
@@ -82,6 +92,10 @@ export default function LookupField({
 
         if (trimmedQuery) {
           params.set("q", trimmedQuery);
+        }
+
+        if (lookup.contextSourceColumn) {
+          params.set("context", effectiveContext);
         }
 
         const response = await fetch(
@@ -128,6 +142,8 @@ export default function LookupField({
     disabled,
     lookup.parentEntityCode,
     lookup.relationshipId,
+    lookup.contextSourceColumn,
+    contextValue,
     query,
   ]);
 
@@ -164,19 +180,31 @@ export default function LookupField({
       return;
     }
 
+    // Reject a stale selection from a different End Item.
+    if (lookup.contextSourceColumn) {
+      const index = lookup.foreignKeyColumns.indexOf(
+        lookup.contextSourceColumn
+      );
+
+      const parentColumn =
+        lookup.primaryKeyColumns[index];
+
+      if (
+        !parentColumn ||
+        !contextValue ||
+        String(selectedItem.key[parentColumn] ?? "") !==
+          contextValue.trim()
+      ) {
+        setError(
+          "This selection does not match the current End Item."
+        );
+        return;
+      }
+    }
+
+    setError(null);
     setSelectedKey(selectedItem.key);
     onChange?.(selectedItem.key);
-  }
-
-  if (disabled) {
-    return (
-      <input
-        disabled
-        value={selectedLabel}
-        placeholder={placeholder}
-        className="mt-3 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500"
-      />
-    );
   }
 
   return (

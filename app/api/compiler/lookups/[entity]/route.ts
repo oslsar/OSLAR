@@ -31,6 +31,7 @@ export async function GET(
       query: url.searchParams.get("q"),
       limit: parseLimit(url.searchParams.get("limit")),
       relationshipId: url.searchParams.get("relationshipId"),
+      contextValue: url.searchParams.get("context"),
     });
 
     if (!result) {

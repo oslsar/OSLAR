@@ -46,15 +46,22 @@ export type CompilerRelationship = {
   relationshipType: string;
   foreignKeyColumns: string[];
   primaryKeyColumns: string[];
+  lookupAnchorColumn: string | null;
   lookupFilter: CompilerLookupFilter | null;
   active: boolean;
 };
 
-export type CompilerLookupFilter = {
-  column: string;
-  operator: "in";
-  values: Array<string | number | boolean>;
-};
+export type CompilerLookupFilter =
+  | {
+      column: string;
+      operator: "in";
+      values: Array<string | number | boolean>;
+    }
+  | {
+      column: string;
+      operator: "eq_context";
+      sourceColumn: string;
+    };
 
 export type CompilerLookup = {
   relationshipId: string;
@@ -64,6 +71,7 @@ export type CompilerLookup = {
   primaryKeyColumns: string[];
   displayColumns: string[];
   composite: boolean;
+  contextSourceColumn: string | null;
 };
 
 export type CompilerEntityBehavior = {
