@@ -23,6 +23,7 @@ type LookupFieldProps = {
   lookup: CompilerLookup;
   value?: Record<string, unknown> | null;
   disabled?: boolean;
+  readOnly?: boolean;
   required?: boolean;
   placeholder?: string;
   onChange?: (value: Record<string, unknown>) => void;
@@ -48,6 +49,7 @@ export default function LookupField({
   lookup,
   value = null,
   disabled = false,
+  readOnly = false,
   required = false,
   placeholder = "Search or select a value",
   onChange,
@@ -71,6 +73,7 @@ export default function LookupField({
 
     if (
       disabled ||
+      readOnly ||
       (lookup.contextSourceColumn && !effectiveContext)
     ) {
       setLoading(false);
@@ -140,6 +143,7 @@ export default function LookupField({
     };
   }, [
     disabled,
+    readOnly,
     lookup.parentEntityCode,
     lookup.relationshipId,
     lookup.contextSourceColumn,
@@ -207,11 +211,41 @@ export default function LookupField({
     onChange?.(selectedItem.key);
   }
 
+  if (readOnly) {
+    const summary = lookup.primaryKeyColumns
+      .map((column) => {
+        const item = value?.[column];
+
+        return `${column}: ${
+          item === null ||
+          item === undefined ||
+          item === ""
+            ? "—"
+            : String(item)
+        }`;
+      })
+      .join(" · ");
+
+    return (
+      <div className="mt-3 rounded-md border border-gray-300 bg-gray-100 px-3 py-3">
+        <p className="text-sm text-gray-800">
+          {summary || "No value selected"}
+        </p>
+
+        <p className="mt-2 text-xs text-gray-500">
+          Read-only relationship. Primary-key values
+          cannot be changed after creation.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-3 space-y-2">
       <input
         type="search"
         value={query}
+        disabled={disabled || readOnly}
         onChange={(event) => setQuery(event.target.value)}
         placeholder={placeholder}
         className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
@@ -219,6 +253,7 @@ export default function LookupField({
 
       <select
         required={required}
+        disabled={disabled || readOnly}
         value={selectedKey ? serializeKey(selectedKey) : ""}
         onChange={(event) => handleSelection(event.target.value)}
         className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"

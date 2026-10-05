@@ -694,9 +694,14 @@ export default function GeneratedForm({
 
                   {field.controlType === "lookup" &&
                   field.lookup ? (
-                    <LookupField
-                      lookup={field.lookup}
-                      contextValue={
+                      <LookupField
+                        lookup={field.lookup}
+                        readOnly={
+                          mode === "view" ||
+                          (mode === "edit" &&
+                            (keyColumns.includes(field.columnName) || field.readOnly))
+                        }
+                        contextValue={
                         field.lookup.contextSourceColumn
                           ? String(
                               values[field.lookup.contextSourceColumn] ?? ""
