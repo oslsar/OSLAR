@@ -277,6 +277,23 @@ export async function buildEntityPreview(
         ) === field.columnName
     );
 
+    const lookupContextFilters =
+      lookupRelationship?.lookupFilter?.operator ===
+      "eq_context"
+        ? [
+            {
+              column:
+                lookupRelationship.lookupFilter.column,
+              sourceColumn:
+                lookupRelationship.lookupFilter
+                  .sourceColumn,
+            },
+          ]
+        : lookupRelationship?.lookupFilter?.operator ===
+            "eq_contexts"
+          ? lookupRelationship.lookupFilter.filters
+          : [];
+
     const lookup = lookupRelationship
       ? {
           relationshipId: lookupRelationship.relationshipId,
@@ -300,9 +317,10 @@ export async function buildEntityPreview(
           composite:
             lookupRelationship.foreignKeyColumns.length > 1,
             contextSourceColumn:
-              lookupRelationship.lookupFilter?.operator === "eq_context"
-                ? lookupRelationship.lookupFilter.sourceColumn
+              lookupContextFilters.length === 1
+                ? lookupContextFilters[0].sourceColumn
                 : null,
+            contextFilters: lookupContextFilters,
         }
       : null;
 

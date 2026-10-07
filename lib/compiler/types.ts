@@ -51,6 +51,11 @@ export type CompilerRelationship = {
   active: boolean;
 };
 
+export type CompilerLookupContextFilter = {
+  column: string;
+  sourceColumn: string;
+};
+
 export type CompilerLookupFilter =
   | {
       column: string;
@@ -61,6 +66,10 @@ export type CompilerLookupFilter =
       column: string;
       operator: "eq_context";
       sourceColumn: string;
+    }
+  | {
+      operator: "eq_contexts";
+      filters: CompilerLookupContextFilter[];
     };
 
 export type CompilerLookup = {
@@ -71,7 +80,13 @@ export type CompilerLookup = {
   primaryKeyColumns: string[];
   displayColumns: string[];
   composite: boolean;
+
+  // Retained for backwards compatibility with existing
+  // single-context generated controls such as HG.
   contextSourceColumn: string | null;
+
+  // Generic one-or-more context mappings.
+  contextFilters: CompilerLookupContextFilter[];
 };
 
 export type CompilerEntityBehavior = {

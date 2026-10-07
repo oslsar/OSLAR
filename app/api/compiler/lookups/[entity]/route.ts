@@ -17,6 +17,33 @@ function parseLimit(value: string | null): number {
   return Math.min(Math.max(parsed, 1), 100);
 }
 
+function parseContextValues(
+  value: string | null
+): Record<string, string | null> | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const parsed: unknown = JSON.parse(value);
+
+  if (
+    typeof parsed !== "object" ||
+    parsed === null ||
+    Array.isArray(parsed)
+  ) {
+    throw new Error("Invalid lookup context values.");
+  }
+
+  return Object.fromEntries(
+    Object.entries(parsed).map(([key, item]) => [
+      key,
+      item === null || item === undefined
+        ? null
+        : String(item),
+    ])
+  );
+}
+
 export async function GET(
   request: Request,
   context: {
@@ -31,7 +58,14 @@ export async function GET(
       query: url.searchParams.get("q"),
       limit: parseLimit(url.searchParams.get("limit")),
       relationshipId: url.searchParams.get("relationshipId"),
+
+      // Existing single-context support retained for HG.
       contextValue: url.searchParams.get("context"),
+
+      // Generic multi-column context support for HO and future tables.
+      contextValues: parseContextValues(
+        url.searchParams.get("contexts")
+      ),
     });
 
     if (!result) {
