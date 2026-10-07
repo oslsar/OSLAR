@@ -80,5 +80,15 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.63.0-noble
+    container_name: oslar-dev-playwright
+    working_dir: /tests
+    volumes:
+      - ./ai-tests:/tests
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: tail -f /dev/null
+
 volumes:
   postgres_data:
