@@ -56,6 +56,15 @@ export type CompilerLookupContextFilter = {
   sourceColumn: string;
 };
 
+// Compiler planning is separate from the legacy browser field projection.
+// Unresolved entries remain represented instead of silently losing a relationship.
+export type CompilerLookupPlanEntry = {
+  relationship: CompilerRelationship;
+  anchorColumn: string | null;
+  anchorSource: "explicit" | "default" | "inferred" | "unresolved";
+  diagnostic: string | null;
+};
+
 export type CompilerLookupFilter =
   | {
       column: string;
@@ -228,6 +237,7 @@ export type CompilerPreview = {
   fields: CompilerField[];
   relationships: CompilerRelationship[];
   gui: {
+    lookupPlan: CompilerLookupPlanEntry[];
     listColumns: string[];
     searchFields: string[];
     formFields: string[];

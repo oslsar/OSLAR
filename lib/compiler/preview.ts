@@ -1,4 +1,5 @@
 import { getEntityMetadata } from "@/lib/compiler/metadata";
+import { planLookupAnchors } from "@/lib/compiler/lookup-plan";
 import type {
   CompilerControlType,
   CompilerPreview,
@@ -227,6 +228,14 @@ export async function buildEntityPreview(
         relationship.relationshipType
       ) &&
       relationship.childEntityCode === entity.entity_code
+  );
+
+  // Phase 1 preserves all relationships in a resolved compiler plan. The
+  // browser projection below remains unchanged until multi-context controls
+  // and selection invalidation can consume this plan safely.
+  const lookupPlan = planLookupAnchors(
+    outgoingRelationships,
+    approvedColumnNames
   );
 
   const lookupAnchorColumns = new Set(
@@ -516,6 +525,7 @@ const generatedForm = formRow
     fields,
     relationships,
     gui: {
+      lookupPlan,
       listColumns,
       searchFields,
       formFields,
