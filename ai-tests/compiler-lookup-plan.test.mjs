@@ -103,11 +103,11 @@ const baselines = {
   XC: [13, [['XB', 'EIACODXA']]],
   HA: [68, [['XA', 'EIACODXA'], ['XH', 'CAGECDXH']]],
   HG: [70, [['XB', 'EIACODXA'], ['HA', 'CAGECDXH']]],
-  HO: [8, [['HG', 'EIACODXA']]],
+  HO: [8, [['HG', 'EIACODXA'], ['XC', 'ALCSEIHO']]],
 };
 
 for (const [entity, [fieldCount, rendered]] of Object.entries(baselines)) {
-  test(`${entity}: live preview preserves legacy projection and all planned relationships`, async () => {
+  test(`${entity}: live preview projects resolved anchors and preserves all planned relationships`, async () => {
     const response = await fetch(`http://127.0.0.1:3002/api/compiler/entities/${entity}/preview`);
     assert.equal(response.status, 200);
     const preview = await response.json();

@@ -230,32 +230,24 @@ export async function buildEntityPreview(
       relationship.childEntityCode === entity.entity_code
   );
 
-  // Phase 1 preserves all relationships in a resolved compiler plan. The
-  // browser projection below remains unchanged until multi-context controls
-  // and selection invalidation can consume this plan safely.
+  // Use the compiler-resolved plan for the browser projection as well as
+  // diagnostics, preserving explicit anchors and inferred collision anchors.
   const lookupPlan = planLookupAnchors(
     outgoingRelationships,
     approvedColumnNames
   );
 
   const lookupAnchorColumns = new Set(
-    outgoingRelationships
-      .map(
-        (relationship) =>
-          relationship.lookupAnchorColumn ??
-          relationship.foreignKeyColumns[0]
-      )
-      .filter(
-        (columnName): columnName is string =>
-          typeof columnName === "string"
-      )
+    lookupPlan.flatMap((entry) =>
+      entry.anchorColumn === null ? [] : [entry.anchorColumn]
+    )
   );
 
   const compositeLookupCompanionColumns = new Set(
-    outgoingRelationships.flatMap((relationship) => {
-      const anchorColumn =
-        relationship.lookupAnchorColumn ??
-        relationship.foreignKeyColumns[0];
+    lookupPlan.flatMap(({ relationship, anchorColumn }) => {
+      if (anchorColumn === null) {
+        return [];
+      }
 
       return relationship.foreignKeyColumns.filter(
         (columnName) =>
@@ -278,13 +270,9 @@ export async function buildEntityPreview(
     null;
 
   const generatedFields = orderedFields.map((field) => {
-    const lookupRelationship = outgoingRelationships.find(
-      (relationship) =>
-        (
-          relationship.lookupAnchorColumn ??
-          relationship.foreignKeyColumns[0]
-        ) === field.columnName
-    );
+    const lookupRelationship = lookupPlan.find(
+      (entry) => entry.anchorColumn === field.columnName
+    )?.relationship;
 
     const lookupContextFilters =
       lookupRelationship?.lookupFilter?.operator ===

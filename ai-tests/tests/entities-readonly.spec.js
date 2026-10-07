@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-// Explicit current baselines, including HO's incomplete relationship rendering.
+// Explicit browser baselines, including both compiler-planned HO relationships.
 const baselines = {
   XA: { fields: 29, lookups: [] },
   XB: { fields: 14, lookups: ['XA'] },
@@ -9,7 +9,7 @@ const baselines = {
   XC: { fields: 13, lookups: ['XB'] },
   HA: { fields: 68, lookups: ['XA', 'XH'] },
   HG: { fields: 70, lookups: ['XB', 'HA'] },
-  HO: { fields: 8, lookups: ['HG'] },
+  HO: { fields: 8, lookups: ['HG', 'XC'] },
 };
 
 function fieldCard(page, column) {
@@ -158,10 +158,13 @@ for (const [entity, baseline] of Object.entries(baselines)) {
       if (entity === 'HO') {
         const parents = preview.relationships.filter(r => r.active && r.childEntityCode === 'HO').map(r => r.parentEntityCode);
         expect(parents.sort()).toEqual(['HG', 'XC']);
-        expect(lookupFields.map(field => field.lookup.parentEntityCode)).toEqual(['HG']);
+        expect(lookupFields.map(field => field.lookup.parentEntityCode)).toEqual(['HG', 'XC']);
+        expect(lookupFields.map(field => [field.lookup.parentEntityCode, field.columnName]))
+          .toEqual([['HG', 'EIACODXA'], ['XC', 'ALCSEIHO']]);
+        expect(lookupFields.map(field => [field.lookup.relationshipId, field.columnName]))
+          .toEqual(preview.gui.lookupPlan.map(entry => [entry.relationship.relationshipId, entry.anchorColumn]));
         expect(preview.behavior).toBeNull();
-        relationshipEvidence = { metadataParents: parents, renderedLookupParents: lookupFields.map(field => field.lookup.parentEntityCode), behavior: preview.behavior };
-        testInfo.annotations.push({ type: 'known limitation', description: 'HO has HG and XC relationships but renders only the HG lookup; both default to EIACODXA. No behavior metadata enables creation.' });
+        relationshipEvidence = { metadataParents: parents, renderedLookupParents: lookupFields.map(field => field.lookup.parentEntityCode), anchors: lookupFields.map(field => ({ parent: field.lookup.parentEntityCode, column: field.columnName })), behavior: preview.behavior };
       }
 
       const edits = page.locator('table').getByRole('link', { name: 'Edit', exact: true });
