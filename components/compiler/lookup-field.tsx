@@ -28,6 +28,7 @@ type LookupFieldProps = {
   placeholder?: string;
   onChange?: (value: Record<string, unknown>) => void;
   contextValue?: string | null;
+  contextValues?: Record<string, unknown>;
 };
 
 function serializeKey(key: Record<string, unknown>): string {
@@ -54,6 +55,7 @@ export default function LookupField({
   placeholder = "Search or select a value",
   onChange,
   contextValue = null,
+  contextValues = {},
 }: LookupFieldProps) {
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<LookupItem[]>([]);
@@ -61,6 +63,30 @@ export default function LookupField({
     useState<Record<string, unknown> | null>(value);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const effectiveContextValues = useMemo(
+    () =>
+      Object.fromEntries(
+        lookup.contextFilters.map((filter) => [
+          filter.sourceColumn,
+          String(
+            contextValues[filter.sourceColumn] ?? ""
+          ).trim(),
+        ])
+      ),
+    [lookup.contextFilters, contextValues]
+  );
+
+  const contextPayload = useMemo(
+    () => JSON.stringify(effectiveContextValues),
+    [effectiveContextValues]
+  );
+
+  const missingRequiredContext =
+    lookup.contextFilters.length > 0 &&
+    lookup.contextFilters.some(
+      (filter) =>
+        !effectiveContextValues[filter.sourceColumn]
+    );
 
   useEffect(() => {
     setSelectedKey(value);
@@ -74,6 +100,7 @@ export default function LookupField({
     if (
       disabled ||
       readOnly ||
+      missingRequiredContext ||
       (lookup.contextSourceColumn && !effectiveContext)
     ) {
       setLoading(false);
@@ -99,6 +126,10 @@ export default function LookupField({
 
         if (lookup.contextSourceColumn) {
           params.set("context", effectiveContext);
+        }
+
+        if (lookup.contextFilters.length > 0) {
+          params.set("contexts", contextPayload);
         }
 
         const response = await fetch(
@@ -147,6 +178,8 @@ export default function LookupField({
     lookup.parentEntityCode,
     lookup.relationshipId,
     lookup.contextSourceColumn,
+    missingRequiredContext,
+    contextPayload,
     contextValue,
     query,
   ]);
@@ -184,8 +217,25 @@ export default function LookupField({
       return;
     }
 
-    // Reject a stale selection from a different End Item.
-    if (lookup.contextSourceColumn) {
+    // Reject a stale selection that no longer matches
+    // the current relationship context.
+    if (lookup.contextFilters.length > 0) {
+      for (const filter of lookup.contextFilters) {
+        const expectedValue =
+          effectiveContextValues[filter.sourceColumn];
+
+        if (
+          !expectedValue ||
+          String(selectedItem.key[filter.column] ?? "") !==
+            expectedValue
+        ) {
+          setError(
+            "This selection does not match the current relationship context."
+          );
+          return;
+        }
+      }
+    } else if (lookup.contextSourceColumn) {
       const index = lookup.foreignKeyColumns.indexOf(
         lookup.contextSourceColumn
       );
@@ -200,7 +250,7 @@ export default function LookupField({
           contextValue.trim()
       ) {
         setError(
-          "This selection does not match the current End Item."
+          "This selection does not match the current relationship context."
         );
         return;
       }

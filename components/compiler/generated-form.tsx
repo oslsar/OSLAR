@@ -426,26 +426,43 @@ export default function GeneratedForm({
       for (const section of form.sections) {
         for (const dependentField of section.fields) {
           const dependentLookup = dependentField.lookup;
-          const sourceColumn =
-            dependentLookup?.contextSourceColumn;
 
           if (
             !dependentLookup ||
-            !sourceColumn ||
             dependentLookup.relationshipId ===
-              selectedLookup.relationshipId ||
-            !selectedLookup.foreignKeyColumns.includes(sourceColumn)
+              selectedLookup.relationshipId
           ) {
             continue;
           }
 
-          const previousContext =
-            String(current[sourceColumn] ?? "");
+          const contextSourceColumns = [
+            ...new Set([
+              ...dependentLookup.contextFilters.map(
+                (filter) => filter.sourceColumn
+              ),
+              ...(dependentLookup.contextSourceColumn
+                ? [dependentLookup.contextSourceColumn]
+                : []),
+            ]),
+          ];
 
-          const newContext =
-            String(next[sourceColumn] ?? "");
+          if (
+            contextSourceColumns.length === 0 ||
+            !contextSourceColumns.some((sourceColumn) =>
+              selectedLookup.foreignKeyColumns.includes(sourceColumn)
+            )
+          ) {
+            continue;
+          }
 
-          if (previousContext === newContext) {
+          const contextChanged =
+            contextSourceColumns.some(
+              (sourceColumn) =>
+                String(current[sourceColumn] ?? "") !==
+                String(next[sourceColumn] ?? "")
+            );
+
+          if (!contextChanged) {
             continue;
           }
 
@@ -708,6 +725,7 @@ export default function GeneratedForm({
                             )
                           : null
                       }
+                      contextValues={values}
                   disabled={
                     mode === "view" ||
                     (
@@ -718,10 +736,21 @@ export default function GeneratedForm({
                       )
                     ) ||
                     Boolean(
-                      field.lookup.contextSourceColumn &&
-                      !String(
-                        values[field.lookup.contextSourceColumn] ?? ""
-                      ).trim()
+                      (
+                        field.lookup.contextSourceColumn &&
+                        !String(
+                          values[field.lookup.contextSourceColumn] ?? ""
+                        ).trim()
+                      ) ||
+                      (
+                        field.lookup.contextFilters.length > 0 &&
+                        field.lookup.contextFilters.some(
+                          (filter) =>
+                            !String(
+                              values[filter.sourceColumn] ?? ""
+                            ).trim()
+                        )
+                      )
                     )
                   }
                       value={Object.fromEntries(
