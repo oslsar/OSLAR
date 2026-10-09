@@ -11,7 +11,7 @@ echo
 
 FAIL=0
 
-echo "[1/4] Development containers"
+echo "[1/5] Development containers"
 for container in oslar-dev-web oslar-dev-postgres oslar-dev-playwright; do
     if docker inspect -f '{{.State.Running}}' "$container" 2>/dev/null | grep -q true; then
         echo "  PASS  $container"
@@ -22,7 +22,7 @@ for container in oslar-dev-web oslar-dev-postgres oslar-dev-playwright; do
 done
 
 echo
-echo "[2/4] OSLAR DEV HTTP"
+echo "[2/5] OSLAR DEV HTTP"
 STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
     --max-time 10 http://127.0.0.1:3002/ || true)
 
@@ -34,7 +34,7 @@ else
 fi
 
 echo
-echo "[3/4] Git diff check"
+echo "[3/5] Git diff check"
 if git diff --check; then
     echo "  PASS  git diff --check"
 else
@@ -43,9 +43,25 @@ else
 fi
 
 echo
-echo "[4/4] Browser regression tests"
+echo "[4/5] Compiler lookup-plan tests"
+if docker exec \
+    -e OSLAR_PREVIEW_BASE_URL=http://127.0.0.1:3000 \
+    oslar-dev-web \
+    node --experimental-strip-types \
+    --test ai-tests/compiler-lookup-plan.test.mjs; then
+    echo "  PASS  Compiler lookup-plan tests"
+else
+    echo "  FAIL  Compiler lookup-plan tests"
+    FAIL=1
+fi
+
+echo
+echo "[5/5] Browser regression tests"
 if docker exec oslar-dev-playwright \
-    npx playwright test tests/smoke.spec.js tests/entities.spec.js; then
+    npx playwright test \
+    tests/smoke.spec.js \
+    tests/entities.spec.js \
+    tests/entities-readonly.spec.js; then
     echo "  PASS  Playwright"
 else
     echo "  FAIL  Playwright"

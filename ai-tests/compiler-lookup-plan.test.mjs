@@ -96,6 +96,8 @@ test('relationship IDs deterministically break ties for the same parent', () => 
 
 // Read-only HTTP checks exercise buildEntityPreview against development metadata.
 // No browser, submissions, database fixtures, or write requests are used.
+const previewBaseUrl =
+  process.env.OSLAR_PREVIEW_BASE_URL ?? 'http://127.0.0.1:3002';
 const baselines = {
   XA: [29, []], XB: [14, [['XA', 'EIACODXA']]],
   CA: [38, [['XB', 'EIACODXA'], ['CA', 'REFEIACA']]],
@@ -108,7 +110,9 @@ const baselines = {
 
 for (const [entity, [fieldCount, rendered]] of Object.entries(baselines)) {
   test(`${entity}: live preview projects resolved anchors and preserves all planned relationships`, async () => {
-    const response = await fetch(`http://127.0.0.1:3002/api/compiler/entities/${entity}/preview`);
+    const response = await fetch(
+      `${previewBaseUrl}/api/compiler/entities/${entity}/preview`
+    );
     assert.equal(response.status, 200);
     const preview = await response.json();
     const fields = preview.gui.form.sections.flatMap(s => s.fields);
@@ -143,6 +147,23 @@ for (const [entity, [fieldCount, rendered]] of Object.entries(baselines)) {
         ['EIACODXA', 'ALCSEIHO', 'LCNSEIHO', 'LCNTYPXB']);
       assert.deepEqual(preview.gui.lookupPlan[1].relationship.primaryKeyColumns,
         ['EIACODXA', 'ALTLCNXB', 'LSACONXB', 'LCNTYPXB']);
+      const uocLookup = fields.find(
+        f => f.columnName === 'ALCSEIHO'
+      ).lookup;
+
+      assert.deepEqual(
+        uocLookup.contextFilters,
+        [
+          {
+            column: 'EIACODXA',
+            sourceColumn: 'EIACODXA',
+          },
+          {
+            column: 'LCNTYPXB',
+            sourceColumn: 'LCNTYPXB',
+          },
+        ]
+      );
     }
   });
 }
