@@ -163,7 +163,37 @@ for (const [entity, baseline] of Object.entries(baselines)) {
           .toEqual([['HG', 'EIACODXA'], ['XC', 'ALCSEIHO']]);
         expect(lookupFields.map(field => [field.lookup.relationshipId, field.columnName]))
           .toEqual(preview.gui.lookupPlan.map(entry => [entry.relationship.relationshipId, entry.anchorColumn]));
-        expect(preview.behavior).toBeNull();
+        expect(preview.behavior).not.toBeNull();
+        expect(preview.behavior.navigationLabel).toBe('Provisioning UOC');
+        expect(preview.behavior.allowCreate).toBe(false);
+        expect(preview.behavior.allowEdit).toBe(false);
+        expect(preview.behavior.allowDelete).toBe(false);
+
+        expect(
+          preview.gui.form.sections.map(section => [
+            section.sectionCode,
+            section.fields.map(field => field.columnName),
+          ])
+        ).toEqual([
+          [
+            'part-application',
+            [
+              'EIACODXA',
+              'LCNTYPXB',
+              'CAGECDHO',
+              'REFNUMHO',
+              'LSACONHO',
+              'ALTLCNHO',
+            ],
+          ],
+          [
+            'system-ei-uoc',
+            [
+              'LCNSEIHO',
+              'ALCSEIHO',
+            ],
+          ],
+        ]);
         relationshipEvidence = { metadataParents: parents, renderedLookupParents: lookupFields.map(field => field.lookup.parentEntityCode), anchors: lookupFields.map(field => ({ parent: field.lookup.parentEntityCode, column: field.columnName })), behavior: preview.behavior };
       }
 
