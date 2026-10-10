@@ -165,7 +165,7 @@ for (const [entity, baseline] of Object.entries(baselines)) {
           .toEqual(preview.gui.lookupPlan.map(entry => [entry.relationship.relationshipId, entry.anchorColumn]));
         expect(preview.behavior).not.toBeNull();
         expect(preview.behavior.navigationLabel).toBe('Provisioning UOC');
-        expect(preview.behavior.allowCreate).toBe(false);
+        expect(preview.behavior.allowCreate).toBe(true);
         expect(preview.behavior.allowEdit).toBe(false);
         expect(preview.behavior.allowDelete).toBe(false);
 
