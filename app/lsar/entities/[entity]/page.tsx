@@ -1,0 +1,287 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { buildEntityPreview } from "@/lib/compiler/preview";
+import { getEntityRows } from "@/lib/compiler/data";
+import GeneratedForm from "@/components/compiler/generated-form";
+import DeleteRecordButton from "@/components/compiler/delete-record-button";
+
+export const dynamic = "force-dynamic";
+
+export default async function EntityPage({
+  params,
+}: {
+  params: Promise<{ entity: string }>;
+}) {
+  const { entity } = await params;
+  const preview = await buildEntityPreview(entity);
+
+  if (!preview) {
+    notFound();
+  }
+
+  const data = await getEntityRows(
+    preview,
+    preview.behavior?.defaultPageSize ?? 25
+  );
+
+  return (
+    <main className="mx-auto max-w-7xl px-6 py-8">
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+            Metadata-generated entity
+          </p>
+
+          <h1 className="mt-2 text-3xl font-bold text-gray-950">
+            {preview.entity.entityCode}
+            {preview.entity.entityName
+              ? ` — ${preview.entity.entityName}`
+              : ""}
+          </h1>
+
+          <p className="mt-2 text-sm text-gray-600">
+            {preview.database.schemaName}.{preview.database.tableName}
+          </p>
+        </div>
+
+        <Link
+          href={`/api/compiler/entities/${encodeURIComponent(
+            preview.entity.entityCode
+          )}/preview`}
+          className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 no-underline hover:bg-gray-50"
+        >
+          View compiler JSON
+        </Link>
+      </div>
+
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <SummaryCard
+          label="Fields"
+          value={preview.summary.fieldCount}
+        />
+        <SummaryCard
+          label="Key fields"
+          value={preview.summary.keyFieldCount}
+        />
+        <SummaryCard
+          label="Relationships"
+          value={preview.summary.relationshipCount}
+        />
+        <SummaryCard
+          label="Standards mappings"
+          value={preview.summary.normalizedMappingCount}
+        />
+      </section>
+
+
+
+      {preview.warnings.length > 0 && (
+        <section className="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-5">
+          <h2 className="font-semibold text-amber-950">
+            Compiler warnings
+          </h2>
+
+          <ul className="mt-3 space-y-2 text-sm text-amber-900">
+            {preview.warnings.map((warning) => (
+              <li key={warning}>• {warning}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="mt-8">
+        <h2 className="text-xl font-semibold text-gray-950">
+          Generated list view
+        </h2>
+
+        <p className="mt-1 text-sm text-gray-600">
+          Generated automatically from included fields, keys and display order.
+        </p>
+
+        <p className="mt-2 text-xs text-gray-500">
+          Showing up to {data.limit} read-only records.
+        </p>
+
+        <div className="mt-4 overflow-x-auto rounded-lg border border-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                {data.columns.map((column) => {
+                  const field = preview.fields.find(
+                    (item) => item.columnName === column
+                  );
+
+                  return (
+                    <th
+                      key={column}
+                      className="whitespace-nowrap px-4 py-3 text-left font-semibold text-gray-700"
+                    >
+                      {field?.displayName ?? column}
+                      <div className="text-xs font-normal text-gray-400">
+                        {column}
+                      </div>
+                    </th>
+                  );
+                })}
+
+                {(
+                  preview.behavior?.allowEdit ||
+                  preview.behavior?.allowDelete
+                ) &&
+                  data.keyColumns.length > 0 && (
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-semibold text-gray-700">
+                      Actions
+                    </th>
+                  )}
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-gray-100 bg-white">
+              {data.rows.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={Math.max(
+                      data.columns.length +
+                        (
+                          (
+                            preview.behavior?.allowEdit ||
+                            preview.behavior?.allowDelete
+                          ) &&
+                          data.keyColumns.length > 0
+                            ? 1
+                            : 0
+                        ),
+                      1
+                    )}
+                    className="px-4 py-8 text-center text-gray-500"
+                  >
+                    No records found.
+                  </td>
+                </tr>
+              ) : (
+                data.rows.map((row, rowIndex) => (
+                  <tr key={rowIndex} className="hover:bg-gray-50">
+                    {data.columns.map((column) => (
+                      <td
+                        key={column}
+                        className="max-w-xs whitespace-nowrap px-4 py-3 text-gray-700"
+                      >
+                        {formatCellValue(row[column])}
+                      </td>
+                    ))}
+
+                    {(
+                      preview.behavior?.allowEdit ||
+                      preview.behavior?.allowDelete
+                    ) &&
+                      data.keyColumns.length > 0 && (
+                        <td className="whitespace-nowrap px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            {preview.behavior?.allowEdit && (
+                              <Link
+                                href={buildEditHref(
+                                  preview.entity.entityCode,
+                                  data.keyColumns,
+                                  row
+                                )}
+                                className="text-sm font-medium text-blue-700 no-underline hover:underline"
+                              >
+                                Edit
+                              </Link>
+                            )}
+
+                            {preview.behavior?.allowDelete && (
+                              <DeleteRecordButton
+                                entityCode={preview.entity.entityCode}
+                                keyColumns={data.keyColumns}
+                                row={row}
+                              />
+                            )}
+                          </div>
+                        </td>
+                      )}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-xl font-semibold text-gray-950">
+          Generated form
+        </h2>
+
+
+        <p className="mt-1 text-sm text-gray-600">
+          Generated from entity, field, relationship, behaviour and layout metadata.
+        </p>
+
+        <GeneratedForm
+          entityCode={preview.entity.entityCode}
+          form={preview.gui.form}
+          mode="create"
+        />
+      </section>
+    </main>
+  );
+}
+
+function SummaryCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <div className="text-sm text-gray-500">{label}</div>
+      <div className="mt-2 text-2xl font-bold text-gray-950">
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function buildEditHref(
+  entityCode: string,
+  keyColumns: string[],
+  row: Record<string, unknown>
+): string {
+  const params = new URLSearchParams();
+
+  for (const column of keyColumns) {
+    const value = row[column];
+
+    if (value !== null && value !== undefined) {
+      params.set(column, String(value));
+    }
+  }
+
+  return (
+    `/lsar/entities/${encodeURIComponent(entityCode)}/edit` +
+    `?${params.toString()}`
+  );
+}
+
+function formatCellValue(value: unknown): string {
+  if (value === null || value === undefined) {
+    return "—";
+  }
+
+  if (value instanceof Date) {
+    return value.toLocaleString();
+  }
+
+  if (typeof value === "object") {
+    return JSON.stringify(value);
+  }
+
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+
+  return String(value);
+}

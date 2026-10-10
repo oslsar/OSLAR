@@ -1,0 +1,6 @@
+BEGIN;
+
+ALTER TABLE lsar_core."CA"
+  ADD COLUMN "TASKDECA" text;
+
+COMMIT;

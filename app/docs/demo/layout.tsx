@@ -1,15 +1,15 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 const nav = [
   { href: "/", label: "Home" },
-  { href: "/demo/tour", label: "Tour" },
-  { href: "/demo/browse", label: "Browse" },
-  { href: "/demo/tailoring", label: "Tailoring" },
-  { href: "/demo/standards", label: "Standards" },
-  { href: "/demo/query", label: "Query" },
-  { href: "/demo/exports", label: "Exports" },
-  { href: "/demo/supdb/item-master", label: "Supdb" },
-  { href: "/demo/help", label: "Help" },
+  { href: "/admin", label: "Administration" },
+  { href: "/docs/demo/browse", label: "LSAR Catalogue" },
+  { href: "/docs/demo/standards", label: "Standards & Mappings" },
+  { href: "/docs/demo/tailoring", label: "Tailoring Studio" },
+  { href: "/docs/demo/query", label: "Query Studio" },
+  { href: "/docs/demo/exports", label: "Exports" },
+  { href: "/demo/supdb/item-master", label: "SUPDB Item Master" },
+  { href: "/docs/demo/help", label: "Help" },
 ];
 
 export default function DemoLayout({
@@ -19,24 +19,28 @@ export default function DemoLayout({
 }) {
   return (
     <div className="flex min-h-screen bg-white text-gray-900">
-      {/* Sidebar */}
       <aside className="flex w-64 flex-col border-r border-gray-200 bg-gray-50">
         <div className="border-b border-gray-200 px-6 py-5">
           <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
             OSLAR
           </div>
+
           <div className="mt-1 text-sm font-semibold">
-            Live Demo Environment
+            LSAR Workspace
+          </div>
+
+          <div className="mt-1 text-xs text-gray-500">
+            Phase 2 development
           </div>
         </div>
 
-        <nav className="flex-1 px-3 py-4">
+        <nav className="flex-1 px-3 py-4" aria-label="OSLAR workspace">
           <ul className="space-y-1">
             {nav.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="block rounded-md px-4 py-2 text-sm text-gray-700 hover:bg-white hover:shadow-sm"
+                  className="block rounded-md px-4 py-2 text-sm text-gray-700 hover:bg-white hover:text-gray-950 hover:shadow-sm"
                 >
                   {item.label}
                 </Link>
@@ -46,29 +50,28 @@ export default function DemoLayout({
         </nav>
 
         <div className="border-t border-gray-200 px-6 py-4 text-xs text-gray-500">
-          <div>Schema v0.1</div>
-          <div>Demo dataset</div>
+          <div>Metadata architecture: Phase 2</div>
+          <div>Development environment</div>
         </div>
       </aside>
 
-      {/* Main + AI Column */}
       <div className="flex flex-1">
-        {/* Main Content */}
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
             <div className="flex items-center justify-between px-6 py-4">
               <div className="flex items-center gap-3">
-                <div className="text-sm font-semibold">Demo</div>
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
-                  Read-only
+                <div className="text-sm font-semibold">OSLAR Workspace</div>
+
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                  Development
                 </span>
               </div>
 
               <Link
-                href="/contact"
+                href="/admin"
                 className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-black"
               >
-                Book walkthrough
+                Open administration
               </Link>
             </div>
           </header>
@@ -76,17 +79,17 @@ export default function DemoLayout({
           <main className="px-8 py-8">{children}</main>
         </div>
 
-        {/* AI Drawer (UI only for now) */}
         <aside className="hidden w-80 border-l border-gray-200 bg-white xl:flex xl:flex-col">
           <div className="border-b border-gray-200 px-5 py-4">
             <div className="text-sm font-semibold">Ask OSLAR</div>
             <div className="text-xs text-gray-500">
-              Demo-scoped assistant
+              Safe metadata and query assistant
             </div>
           </div>
 
           <div className="flex-1 p-5 text-sm text-gray-500">
-            AI assistant UI placeholder.
+            The assistant will generate structured, validated requests rather
+            than passing unrestricted SQL directly to PostgreSQL.
           </div>
         </aside>
       </div>

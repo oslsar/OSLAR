@@ -58,3 +58,8 @@ package.json.working
 .venv/
 
 
+
+# Playwright / AI browser testing
+/ai-tests/node_modules/
+/ai-tests/test-results/
+/ai-tests/playwright-report/
