@@ -5,6 +5,19 @@ import type {
   CompilerValidationResult,
 } from "@/lib/compiler/types";
 
+export function isValidDecimal(
+  text: string,
+  precision: number,
+  scale: number
+): boolean {
+  const integerDigits = precision - scale;
+  // A zero before the decimal point is required by numeric coercion, but
+  // does not consume integer capacity for numeric(p,p).
+  const integerPattern = integerDigits === 0 ? "0" : `\\d{1,${integerDigits}}`;
+  const fractionPattern = scale === 0 ? "" : `(?:\\.\\d{1,${scale}})?`;
+  return new RegExp(`^-?${integerPattern}${fractionPattern}$`).test(text);
+}
+
 function stringValue(value: unknown): string {
   if (value === null || value === undefined) {
     return "";
@@ -71,12 +84,7 @@ function validateField(
       field.validation.precision -
       field.validation.scale;
 
-    const decimalPattern = new RegExp(
-      `^-?\\d{1,${integerDigits}}` +
-      `(?:\\.\\d{1,${field.validation.scale}})?$`
-    );
-
-    if (!decimalPattern.test(text)) {
+    if (!isValidDecimal(text, field.validation.precision, field.validation.scale)) {
       return {
         columnName: field.columnName,
         label: field.label,

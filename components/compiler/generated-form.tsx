@@ -3,6 +3,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import LookupField from "@/components/compiler/lookup-field";
+import { isValidDecimal } from "@/lib/compiler/validation";
 import type {
   CompilerForm,
   CompilerGuiField,
@@ -179,11 +180,7 @@ function validateFieldValue(
       field.validation.precision -
       field.validation.scale;
 
-    const decimalPattern = new RegExp(
-      `^-?\\d{1,${integerDigits}}(?:\\.\\d{1,${field.validation.scale}})?$`
-    );
-
-    if (!decimalPattern.test(text)) {
+    if (!isValidDecimal(text, field.validation.precision, field.validation.scale)) {
       return `${field.label} must have no more than ${integerDigits} integer digits and ${field.validation.scale} decimal places.`;
     }
   }
