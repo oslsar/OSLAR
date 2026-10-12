@@ -23,6 +23,8 @@ const entitiesSql = read('../oslar-db/migrations/20261010_041_add_wescam_opus_tr
 const presentationSql = read('../oslar-db/migrations/20261010_042_add_wescam_opus_trial_presentation.sql');
 const editSql = read('../oslar-db/migrations/20261011_043_enable_wescam_edit.sql');
 const editDownSql = read('../oslar-db/rollback/20261011_043_enable_wescam_edit_down.sql');
+const deleteSql = read('../oslar-db/migrations/20261011_044_enable_wescam_delete.sql');
+const deleteDownSql = read('../oslar-db/rollback/20261011_044_enable_wescam_delete_down.sql');
 const quoted = line => [...line.matchAll(/'((?:''|[^'])*)'/g)].map(m => m[1].replaceAll("''", "'"));
 const relationships = entitiesSql.split('\n').filter(l => l.startsWith("('WESCAM_") && l.includes("'foreign_key'"))
   .map((line, index) => {
@@ -54,6 +56,16 @@ function applyEditMigration(sql, rows) {
   }
 }
 applyEditMigration(editSql, behaviors);
+
+function applyDeleteMigration(sql, rows) {
+  const update = sql.match(/UPDATE lsar_meta\.entity_behavior\s+SET allow_delete = (TRUE|FALSE)\s+WHERE entity_code IN \(([^)]*)\);/);
+  assert.ok(update, 'expected scoped delete-only UPDATE');
+  const scope = new Set(quoted(update[2]));
+  for (const row of Object.values(rows)) {
+    if (scope.has(row.entity_code)) row.allow_delete = update[1] === 'TRUE';
+  }
+}
+applyDeleteMigration(deleteSql, behaviors);
 
 test('all seven relationship mappings match the approved source rules', () => {
   const xb = keys.XB;
@@ -144,7 +156,7 @@ for (const [name, columns] of Object.entries(source)) {
     assert.equal(preview.summary.mandatoryFieldCount, keys[name].length);
     assert.equal(preview.behavior.allowCreate, true);
     assert.equal(preview.behavior.allowEdit, true);
-    assert.equal(preview.behavior.allowDelete, false);
+    assert.equal(preview.behavior.allowDelete, true);
     assert.equal(preview.behavior.allowImport, false);
     const fields = preview.gui.form.sections.flatMap(s => s.fields);
     assert.deepEqual(fields.map(f => f.columnName), columns.map(c => c.name));
@@ -271,4 +283,30 @@ test('edit mode keeps every Wescam key read-only and permits ordinary non-key fi
   const update = read('../lib/compiler/update.ts');
   assert.match(update, /Primary-key field \$\{column\} cannot be changed during edit/);
   assert.match(update, /!field\.readOnly &&\s*!keyColumns\.includes\(field\.columnName\)/);
+});
+
+
+test('044 and rollback affect only delete permission for exactly nine Wescam entities', () => {
+  const expected = Object.keys(keys).map(name => `WESCAM_${name}`).sort();
+  for (const [sql, enabled] of [[deleteSql, true], [deleteDownSql, false]]) {
+    assert.match(sql, /^BEGIN;/);
+    assert.match(sql, /COMMIT;\s*$/);
+    assert.match(sql, /current_database\(\) <> 'open_lsar'/);
+    assert.match(sql, /GET DIAGNOSTICS affected_rows = ROW_COUNT;/);
+    assert.match(sql, /IF affected_rows <> 9 THEN/);
+    assert.equal((sql.match(/\bUPDATE\b/g) ?? []).length, 1);
+    assert.doesNotMatch(sql, /\b(?:INSERT|DELETE|ALTER|CREATE|DROP|TRUNCATE)\b/);
+    const update = sql.match(/UPDATE lsar_meta\.entity_behavior\s+SET ([\s\S]*?)\s+WHERE entity_code IN \(([^)]*)\);/);
+    assert.equal(update[1], `allow_delete = ${enabled ? 'TRUE' : 'FALSE'}`);
+    assert.deepEqual(quoted(update[2]).sort(), expected);
+  }
+  const rows = { ...structuredClone(behaviors),
+    BASELINE: { entity_code: 'BASELINE', allow_create: false, allow_edit: true, allow_delete: true, allow_import: true, allow_export: false },
+  };
+  const before = structuredClone(rows);
+  applyDeleteMigration(deleteDownSql, rows);
+  for (const code of expected) assert.deepEqual(rows[code], { ...before[code], allow_delete: false });
+  assert.deepEqual(rows.BASELINE, before.BASELINE);
+  applyDeleteMigration(deleteSql, rows);
+  assert.deepEqual(rows, before);
 });

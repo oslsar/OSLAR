@@ -5,7 +5,7 @@ import { getEntityRows } from "@/lib/compiler/data";
 import ListControls from "@/components/compiler/list-controls";
 import { listCapabilities, normalizeListCriteria, listQueryString, type ListSearchParams } from "@/lib/compiler/list-query";
 import GeneratedForm from "@/components/compiler/generated-form";
-import DeleteRecordButton from "@/components/compiler/delete-record-button";
+import DeleteRecordButton, { DeleteFeedback } from "@/components/compiler/delete-record-button";
 
 export const dynamic = "force-dynamic";
 
@@ -116,6 +116,7 @@ export default async function EntityPage({
           {data.totalCount} matching records. Page {data.page} of {Math.max(1, Math.ceil(data.totalCount / (data.limit || 1)))}. Showing {data.rows.length} records.
         </p>
 
+        <DeleteFeedback key={preview.entity.entityCode} entityCode={preview.entity.entityCode} />
         <ListControls
           key={canonical}
           path={path}
