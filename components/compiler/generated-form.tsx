@@ -3,6 +3,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import LookupField from "@/components/compiler/lookup-field";
+import { applyLookupValues } from "@/lib/compiler/lookup-selection";
 import { isValidDecimal } from "@/lib/compiler/validation";
 import type {
   CompilerForm,
@@ -403,85 +404,14 @@ export default function GeneratedForm({
       return;
     }
 
-    setValues((current) => {
-      const next = { ...current };
-
-      // Populate fields from the selected parent.
-      selectedLookup.foreignKeyColumns.forEach(
-        (foreignColumn, index) => {
-          const primaryColumn =
-            selectedLookup.primaryKeyColumns[index];
-
-          if (primaryColumn) {
-            next[foreignColumn] =
-              selectedKey[primaryColumn] ?? null;
-          }
-        }
-      );
-
-      // Clear dependent lookups when their parent context changes.
-      for (const section of form.sections) {
-        for (const dependentField of section.fields) {
-          const dependentLookup = dependentField.lookup;
-
-          if (
-            !dependentLookup ||
-            dependentLookup.relationshipId ===
-              selectedLookup.relationshipId
-          ) {
-            continue;
-          }
-
-          const contextSourceColumns = [
-            ...new Set([
-              ...dependentLookup.contextFilters.map(
-                (filter) => filter.sourceColumn
-              ),
-              ...(dependentLookup.contextSourceColumn
-                ? [dependentLookup.contextSourceColumn]
-                : []),
-            ]),
-          ];
-
-          if (
-            contextSourceColumns.length === 0 ||
-            !contextSourceColumns.some((sourceColumn) =>
-              selectedLookup.foreignKeyColumns.includes(sourceColumn)
-            )
-          ) {
-            continue;
-          }
-
-          const contextChanged =
-            contextSourceColumns.some(
-              (sourceColumn) =>
-                String(current[sourceColumn] ?? "") !==
-                String(next[sourceColumn] ?? "")
-            );
-
-          if (!contextChanged) {
-            continue;
-          }
-
-          // Preserve shared parent fields, but clear the
-          // dependent lookup's own selection.
-          for (
-            const foreignColumn of
-            dependentLookup.foreignKeyColumns
-          ) {
-            if (
-              !selectedLookup.foreignKeyColumns.includes(
-                foreignColumn
-              )
-            ) {
-              next[foreignColumn] = "";
-            }
-          }
-        }
-      }
-
-      return next;
-    });
+    setValues((current) => applyLookupValues(
+      current,
+      selectedLookup,
+      selectedKey,
+      form.sections.flatMap((section) =>
+        section.fields.flatMap((item) => item.lookup ? [item.lookup] : [])
+      )
+    ));
   }
 
   async function handleSubmit() {

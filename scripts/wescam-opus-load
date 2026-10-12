@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Administrator-run only. Fixed databases, schema and table allowlist prevent
+# accidental baseline/production writes. No DDL or source writes are issued.
+replace=false
+container=oslar-dev-postgres
+for option in "$@"; do
+    case "$option" in
+        --replace) replace=true ;;
+        --help)
+            echo 'Usage: scripts/wescam-opus-load [--replace]'
+            echo 'Copies LSAR_OPUS.egl into open_lsar.lsar_core.WESCAM_* using oslar-dev-postgres.'
+            echo 'Without --replace every target must be empty. Replacement is atomic per table.'
+            exit 0 ;;
+        *) echo "Unknown option: $option" >&2; exit 2 ;;
+    esac
+done
+
+tables=(XA XB XC HA HG HO THA THG XF)
+psql_db() {
+    local database=$1
+    shift
+    docker exec -i "$container" psql -X -q -U postgres -d "$database" \
+        -v ON_ERROR_STOP=1 "$@"
+}
+source_query() {
+    psql_db LSAR_OPUS -At -c "BEGIN READ ONLY; $1; COMMIT;"
+}
+target_query() {
+    psql_db open_lsar -At -c "BEGIN READ ONLY; $1; COMMIT;"
+}
+
+# Complete preflight before any target write, including exact column order/types.
+signature_sql() {
+    local schema=$1 table=$2
+    echo "SELECT string_agg(a.attname || ':' || format_type(a.atttypid, a.atttypmod), '|' ORDER BY a.attnum)
+          FROM pg_attribute a WHERE a.attrelid = '$schema.\"$table\"'::regclass
+          AND a.attnum > 0 AND NOT a.attisdropped"
+}
+source_copy() {
+    local table=$1
+    psql_db LSAR_OPUS -f - <<SQL
+BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY;
+SELECT count(*) AS source_count FROM egl."$table" \gset
+\echo WESCAM_SOURCE_COUNT :source_count
+COPY egl."$table" TO STDOUT WITH (FORMAT binary);
+COMMIT;
+SQL
+}
+for table in "${tables[@]}"; do
+    source_exists=$(source_query "SELECT to_regclass('egl.\"$table\"') IS NOT NULL")
+    target_exists=$(target_query "SELECT to_regclass('lsar_core.\"WESCAM_$table\"') IS NOT NULL")
+    if [[ $source_exists != t || $target_exists != t ]]; then
+        echo "Missing source or target for $table; apply reviewed migrations first." >&2
+        exit 1
+    fi
+    source_signature=$(source_query "$(signature_sql egl "$table")")
+    target_signature=$(target_query "$(signature_sql lsar_core "WESCAM_$table")")
+    if [[ $source_signature != "$target_signature" ]]; then
+        echo "Column order/type mismatch for $table; load cancelled." >&2
+        exit 1
+    fi
+    target_count=$(target_query "SELECT count(*) FROM lsar_core.\"WESCAM_$table\"")
+    if [[ $replace == false && $target_count != 0 ]]; then
+        echo "WESCAM_$table contains $target_count rows. Explicit --replace is required." >&2
+        exit 1
+    fi
+done
+
+# COUNT and COPY use the same source snapshot. Binary COPY preserves source
+# payload (including stored timestamp precision, NULLs and multiline text).
+# Source output streams directly into the target COPY, never row-by-row inserts.
+for table in "${tables[@]}"; do
+    truncate_sql=''
+    if [[ $replace == true ]]; then
+        truncate_sql="TRUNCATE TABLE lsar_core.\"WESCAM_$table\";"
+    fi
+    # -1 keeps lock, emptiness guard, optional TRUNCATE, COPY, and count assertion
+    # in one target transaction. Failure rolls back this table; previous tables
+    # remain committed. Retry the complete load with --replace after inspection.
+    source_copy "$table" | {
+        read -r marker source_count
+        if [[ $marker != WESCAM_SOURCE_COUNT || ! $source_count =~ ^[0-9]+$ ]]; then
+            echo "Unable to read source snapshot count for $table" >&2
+            exit 1
+        fi
+        psql_db open_lsar -1 \
+        -c "LOCK TABLE lsar_core.\"WESCAM_$table\" IN ACCESS EXCLUSIVE MODE;
+            DO \$\$ BEGIN
+              IF NOT $replace AND EXISTS (SELECT 1 FROM lsar_core.\"WESCAM_$table\") THEN
+                RAISE EXCEPTION 'Target became populated; --replace required';
+              END IF;
+            END \$\$;
+            $truncate_sql" \
+        -c "COPY lsar_core.\"WESCAM_$table\" FROM STDIN WITH (FORMAT binary)" \
+        -c "DO \$\$ DECLARE actual bigint; BEGIN
+              SELECT count(*) INTO actual FROM lsar_core.\"WESCAM_$table\";
+              IF actual <> $source_count THEN
+                RAISE EXCEPTION 'Count mismatch: source %, target %', $source_count, actual;
+              END IF;
+              RAISE NOTICE '$table: source=%, target=%', $source_count, actual;
+            END \$\$;"
+    }
+done
+echo 'Wescam COPY complete: all nine source/target counts match.'

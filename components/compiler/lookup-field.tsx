@@ -92,6 +92,8 @@ export default function LookupField({
     setSelectedKey(value);
   }, [value]);
 
+  const selectionPayload = JSON.stringify(value);
+
   useEffect(() => {
     setItems([]);
 
@@ -181,6 +183,7 @@ export default function LookupField({
     missingRequiredContext,
     contextPayload,
     contextValue,
+    selectionPayload,
     query,
   ]);
 

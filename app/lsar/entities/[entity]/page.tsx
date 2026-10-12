@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { buildEntityPreview } from "@/lib/compiler/preview";
 import { getEntityRows } from "@/lib/compiler/data";
+import ListControls from "@/components/compiler/list-controls";
+import { listCapabilities, normalizeListCriteria, listQueryString, type ListSearchParams } from "@/lib/compiler/list-query";
 import GeneratedForm from "@/components/compiler/generated-form";
 import DeleteRecordButton from "@/components/compiler/delete-record-button";
 
@@ -9,8 +11,10 @@ export const dynamic = "force-dynamic";
 
 export default async function EntityPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ entity: string }>;
+  searchParams: Promise<ListSearchParams>;
 }) {
   const { entity } = await params;
   const preview = await buildEntityPreview(entity);
@@ -19,10 +23,20 @@ export default async function EntityPage({
     notFound();
   }
 
-  const data = await getEntityRows(
-    preview,
-    preview.behavior?.defaultPageSize ?? 25
-  );
+  const rawParams = await searchParams;
+  const criteria = normalizeListCriteria(preview, rawParams);
+  const capabilities = listCapabilities(preview);
+  const path = `/lsar/entities/${encodeURIComponent(preview.entity.entityCode)}`;
+  const data = await getEntityRows(preview, preview.behavior?.defaultPageSize ?? 25, criteria);
+  criteria.page = data.page;
+  const canonical = listQueryString(criteria);
+  const raw = new URLSearchParams();
+  for (const [name, value] of Object.entries(rawParams)) {
+    for (const item of Array.isArray(value) ? value : value === undefined ? [] : [value]) raw.append(name, item);
+  }
+  const normalized = new URLSearchParams(canonical.replace(/^\?/, ""));
+  raw.sort(); normalized.sort();
+  if (raw.toString() !== normalized.toString()) redirect(path + canonical);
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-8">
@@ -99,8 +113,20 @@ export default async function EntityPage({
         </p>
 
         <p className="mt-2 text-xs text-gray-500">
-          Showing up to {data.limit} read-only records.
+          {data.totalCount} matching records. Page {data.page} of {Math.max(1, Math.ceil(data.totalCount / (data.limit || 1)))}. Showing {data.rows.length} records.
         </p>
+
+        <ListControls
+          key={canonical}
+          path={path}
+          criteria={criteria}
+          searchable={capabilities.searchColumns.length > 0}
+          fields={capabilities.filterFields}
+        />
+        <nav aria-label="List pagination" className="mt-3 flex gap-4 text-sm text-blue-700">
+          {data.page > 1 && <Link href={path + listQueryString(criteria, data.page - 1)}>Previous page</Link>}
+          {data.page * data.limit < data.totalCount && <Link href={path + listQueryString(criteria, data.page + 1)}>Next page</Link>}
+        </nav>
 
         <div className="mt-4 overflow-x-auto rounded-lg border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200 text-sm">

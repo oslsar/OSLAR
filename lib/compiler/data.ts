@@ -1,4 +1,5 @@
 import { pool } from "@/lib/db";
+import { listPredicate, type ListCriteria } from "@/lib/compiler/list-query";
 import type { CompilerPreview } from "@/lib/compiler/types";
 
 export type CompilerDataResult = {
@@ -6,6 +7,8 @@ export type CompilerDataResult = {
   keyColumns: string[];
   rows: Record<string, unknown>[];
   limit: number;
+  page: number;
+  totalCount: number;
 };
 
 export type CompilerRecordResult = {
@@ -23,7 +26,8 @@ function quoteIdentifier(identifier: string): string {
 
 export async function getEntityRows(
   preview: CompilerPreview,
-  requestedLimit = 25
+  requestedLimit = 25,
+  criteria: ListCriteria = { search: "", filters: [], page: 1 }
 ): Promise<CompilerDataResult> {
   if (!preview.database.tableExists) {
     return {
@@ -38,10 +42,13 @@ export async function getEntityRows(
         .map((field) => field.columnName),
       rows: [],
       limit: 0,
+      page: 1,
+      totalCount: 0,
     };
   }
 
-  const limit = Math.min(Math.max(requestedLimit, 1), 100);
+  const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(Math.trunc(requestedLimit), 1), 100) : 25;
+  const requestedPage = Number.isSafeInteger(criteria.page) && criteria.page > 0 ? criteria.page : 1;
 
   const approvedColumns = new Set(
     preview.fields
@@ -69,6 +76,8 @@ export async function getEntityRows(
       keyColumns: [],
       rows: [],
       limit,
+      page: 1,
+      totalCount: 0,
     };
   }
 
@@ -86,9 +95,12 @@ export async function getEntityRows(
     ]),
   ];
 
-  const columnSql = selectedColumns
-    .map(quoteIdentifier)
-    .join(", ");
+  // JSON aggregation must retain pg's string representation of exact decimals/bigints.
+  const columnSql = selectedColumns.map(column => {
+    const quoted = quoteIdentifier(column);
+    const spec = preview.fields.find(field => field.columnName === column)?.formatSpec?.trim().toLowerCase() ?? "";
+    return /^(numeric|decimal|bigint)/.test(spec) ? `${quoted}::text AS ${quoted}` : quoted;
+  }).join(", ");
 
   const defaultSort =
     preview.gui.defaultSort &&
@@ -98,23 +110,36 @@ export async function getEntityRows(
         columns[0] ??
         selectedColumns[0];
 
-  const orderSql = quoteIdentifier(defaultSort);
-
-  const result = await pool.query<Record<string, unknown>>(
-    `
-      SELECT ${columnSql}
-      FROM ${schemaSql}.${tableSql}
-      ORDER BY ${orderSql} ASC NULLS LAST
-      LIMIT $1
-    `,
-    [limit]
-  );
-
+  const direction = preview.behavior?.defaultSortDirection === "desc" ? "DESC" : "ASC";
+  const orderSql = [defaultSort, ...keyColumns.filter(column => column !== defaultSort)]
+    .map(column => `list_source.${quoteIdentifier(column)} ${direction} NULLS LAST`).join(", ");
+  const predicate = listPredicate(preview, criteria);
+  const limitParameter = predicate.values.length + 1;
+  const pageParameter = limitParameter + 1;
+  // Count and rows share one statement/snapshot. Clamp stale bookmarked pages.
+  const result = await pool.query<{
+    total_count: string; page: string; records: Record<string, unknown>[];
+  }>(`
+    WITH totals AS (
+      SELECT count(*) AS total_count FROM ${schemaSql}.${tableSql} ${predicate.sql}
+    ), paging AS (
+      SELECT total_count, LEAST($${pageParameter}::bigint,
+        GREATEST(1, CEIL(total_count::numeric / $${limitParameter}::integer)))::bigint AS page
+      FROM totals
+    )
+    SELECT total_count, page,
+      COALESCE((SELECT json_agg(records) FROM (
+        SELECT ${columnSql} FROM ${schemaSql}.${tableSql} AS list_source ${predicate.sql}
+        ORDER BY ${orderSql}
+        LIMIT $${limitParameter}::integer
+        OFFSET ((paging.page - 1) * $${limitParameter}::integer)
+      ) records), '[]'::json) AS records
+    FROM paging
+  `, [...predicate.values, limit, requestedPage]);
+  const resultPage = result.rows[0];
   return {
-    columns,
-    keyColumns,
-    rows: result.rows,
-    limit,
+    columns, keyColumns, rows: resultPage?.records ?? [], limit,
+    page: Number(resultPage?.page ?? 1), totalCount: Number(resultPage?.total_count ?? 0),
   };
 }
 

@@ -1,0 +1,1588 @@
+{
+  "HA": [
+    {
+      "name": "EIACODXA",
+      "type": "character varying(10)"
+    },
+    {
+      "name": "CAGECDXH",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "REFNUMHA",
+      "type": "character varying(32)"
+    },
+    {
+      "name": "ITNAMEHA",
+      "type": "text"
+    },
+    {
+      "name": "INAMECHA",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "REFNCCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "REFNVCHA",
+      "type": "numeric(1,0)"
+    },
+    {
+      "name": "DLSCRCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "DOCIDCHA",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "ITMMGCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "COGNSNHA",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "SMMNSNHA",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "MATNSNHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "FSCNSNHA",
+      "type": "numeric(4,0)"
+    },
+    {
+      "name": "NIINSNHA",
+      "type": "character varying(9)"
+    },
+    {
+      "name": "ACTNSNHA",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "UICONVHA",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "SHLIFEHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "SLACTNHA",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "PPSLSTHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "DOCAVCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "PRDLDTHA",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "SPMACCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "SMAINCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "CRITCDHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "PMICODHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "SAIPCDHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "AAPLCCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "BBPLCCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "CCPLCCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "DDPLCCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "EEPLCCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "FFPLCCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "GGPLCCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "HHPLCCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "JJPLCCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "KKPLCCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "LLPLCCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "MMPLCCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "PHYSECHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "ADPEQPHA",
+      "type": "numeric(1,0)"
+    },
+    {
+      "name": "DEMILIHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "ACQMETHA",
+      "type": "numeric(1,0)"
+    },
+    {
+      "name": "AMSUFCHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "HMSCOSHA",
+      "type": "numeric(8,0)"
+    },
+    {
+      "name": "HWDCOSHA",
+      "type": "numeric(8,0)"
+    },
+    {
+      "name": "HWSCOSHA",
+      "type": "numeric(8,0)"
+    },
+    {
+      "name": "CTICODHA",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "UWEIGHHA",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "ULENGTHA",
+      "type": "numeric(4,1)"
+    },
+    {
+      "name": "UWIDTHHA",
+      "type": "numeric(4,1)"
+    },
+    {
+      "name": "UHEIGHHA",
+      "type": "numeric(4,1)"
+    },
+    {
+      "name": "HAZCODHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "UNITMSHA",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "UNITISHA",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "LINNUMHA",
+      "type": "character varying(6)"
+    },
+    {
+      "name": "CRITITHA",
+      "type": "character varying(13)"
+    },
+    {
+      "name": "INDMATHA",
+      "type": "character varying(19)"
+    },
+    {
+      "name": "MTLEADHA",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "MTLWGTHA",
+      "type": "numeric(6,3)"
+    },
+    {
+      "name": "MATERLHA",
+      "type": "character varying(240)"
+    },
+    {
+      "name": "P2000MHA",
+      "type": "numeric(1,0)"
+    },
+    {
+      "name": "HMSCCCHA",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "HWDCCCHA",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "HWSCCCHA",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "WUUUOMHA",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "SUUUOMHA",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "CATOFMHA",
+      "type": "numeric(1,0)"
+    },
+    {
+      "name": "LDOSMOHA",
+      "type": "character varying(200)"
+    },
+    {
+      "name": "CLAOFSHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "DOMMACHA",
+      "type": "character varying(6)"
+    },
+    {
+      "name": "ELESEDHA",
+      "type": "numeric(1,0)"
+    },
+    {
+      "name": "HAZMATHA",
+      "type": "character varying(4)"
+    },
+    {
+      "name": "LIFCATHA",
+      "type": "character varying(9)"
+    },
+    {
+      "name": "NEITEMHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "POOLITHA",
+      "type": "numeric(1,0)"
+    },
+    {
+      "name": "REFNJCHA",
+      "type": "numeric(1,0)"
+    },
+    {
+      "name": "SPCLASHA",
+      "type": "numeric(1,0)"
+    },
+    {
+      "name": "UPKDIRHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "ENGRECHA",
+      "type": "character varying(240)"
+    },
+    {
+      "name": "PROCCDHA",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "DRAGHTHA",
+      "type": "numeric(4,0)"
+    },
+    {
+      "name": "DRGTUMHA",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "SPEDRWHA",
+      "type": "character varying(36)"
+    },
+    {
+      "name": "DSLOCMHA",
+      "type": "numeric(8,0)"
+    },
+    {
+      "name": "DSLOCPHA",
+      "type": "numeric(8,0)"
+    },
+    {
+      "name": "SWRIPRHA",
+      "type": "character varying(200)"
+    },
+    {
+      "name": "PSIZEMHA",
+      "type": "double precision"
+    },
+    {
+      "name": "PSIZEPHA",
+      "type": "double precision"
+    },
+    {
+      "name": "SRFREQHA",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "MEMREQHA",
+      "type": "double precision"
+    },
+    {
+      "name": "SWVERNHA",
+      "type": "character varying(4)"
+    },
+    {
+      "name": "FITCODHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "CALMKRHA",
+      "type": "numeric(1,0)"
+    },
+    {
+      "name": "PRVDOPHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "ITMTYPHA",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "SCHDBAHA",
+      "type": "character varying(10)"
+    },
+    {
+      "name": "CRCBTYHA",
+      "type": "character varying(33)"
+    },
+    {
+      "name": "HWACCCHA",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "ICLSUPHA",
+      "type": "character varying(4)"
+    },
+    {
+      "name": "ISUBCLHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "SPHANDHA",
+      "type": "text"
+    },
+    {
+      "name": "DEMLDTHA",
+      "type": "timestamp with time zone"
+    },
+    {
+      "name": "EMINCPHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "EMSENSHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "MAGSNSHA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "MTSTRTHA",
+      "type": "character varying(65)"
+    },
+    {
+      "name": "SCRATEHA",
+      "type": "double precision"
+    },
+    {
+      "name": "SWTYPEHA",
+      "type": "character varying(30)"
+    },
+    {
+      "name": "PSIZUMHA",
+      "type": "character varying(10)"
+    },
+    {
+      "name": "USERIDZU",
+      "type": "character varying(30)"
+    },
+    {
+      "name": "Filter",
+      "type": "character varying(10)"
+    }
+  ],
+  "HG": [
+    {
+      "name": "CAGECDXH",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "REFNUMHA",
+      "type": "character varying(32)"
+    },
+    {
+      "name": "EIACODXA",
+      "type": "character varying(10)"
+    },
+    {
+      "name": "LSACONXB",
+      "type": "character varying(18)"
+    },
+    {
+      "name": "ALTLCNXB",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "LCNTYPXB",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "PLISNOHG",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "QTYASYHG",
+      "type": "character varying(4)"
+    },
+    {
+      "name": "SUPINDHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "DATASCHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "PROSICHG",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "LLIPTDHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "PPLPTDHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "SFPPTDHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "CBLPTDHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "RILPTDHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "ISLPTDHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "PCLPTDHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "TTLPTDHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "SCPPTDHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "ARAPTDHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "ARBPTDHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "TOCCODHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "INDCODHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "QTYPEIHG",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "PIPLISHG",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "SAPLISHG",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "HARDCIHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "REMIPIHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "LRUNITHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "ITMCATHG",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "ESSCODHG",
+      "type": "numeric(1,0)"
+    },
+    {
+      "name": "SMRCODHG",
+      "type": "character varying(6)"
+    },
+    {
+      "name": "MRRONEHG",
+      "type": "numeric(8,4)"
+    },
+    {
+      "name": "MRRTWOHG",
+      "type": "numeric(8,3)"
+    },
+    {
+      "name": "MRRMODHG",
+      "type": "character varying(7)"
+    },
+    {
+      "name": "ORTDOOHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "FRTDFFHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "HRTDHHHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "LRTDLLHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "DRTDDDHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "MINREUHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "MAOTIMHG",
+      "type": "character varying(4)"
+    },
+    {
+      "name": "MAIACTHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "RISSBUHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "RMSSLIHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "RTLLQTHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "TOTQTYHG",
+      "type": "numeric(6,0)"
+    },
+    {
+      "name": "OMTDOOHG",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "FMTDFFHG",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "HMTDHHHG",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "LMTDLLHG",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "DMTDDDHG",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "CBDMTDHG",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "CADMTDHG",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "ORCTOOHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "FRCTFFHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "HRCTHHHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "LRCTLLHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "DRCTDDHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "CONRCTHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "NORETSHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "REPSURHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "DRPONEHG",
+      "type": "character varying(6)"
+    },
+    {
+      "name": "DRPTWOHG",
+      "type": "character varying(6)"
+    },
+    {
+      "name": "WRKUCDHG",
+      "type": "character varying(11)"
+    },
+    {
+      "name": "ALLOWCHG",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "ALIQTYHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "ALLOWSHG",
+      "type": "numeric(9,0)"
+    },
+    {
+      "name": "ATSOSPHG",
+      "type": "numeric(1,0)"
+    },
+    {
+      "name": "SIDCAGHG",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "SIDREFHG",
+      "type": "character varying(32)"
+    },
+    {
+      "name": "SIDNSNHG",
+      "type": "character varying(13)"
+    },
+    {
+      "name": "RECMQYHG",
+      "type": "numeric(5,0)"
+    },
+    {
+      "name": "RECORQHG",
+      "type": "numeric(5,0)"
+    },
+    {
+      "name": "SOMFRGHG",
+      "type": "character varying(40)"
+    },
+    {
+      "name": "SUPCATHG",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "VFICODHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "TOTLIFHG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "PREIICHG",
+      "type": "character varying(12)"
+    },
+    {
+      "name": "PREISTHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "SOMFIDHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "TURNRSHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "EQTSERHG",
+      "type": "character varying(6)"
+    },
+    {
+      "name": "IDENTNHG",
+      "type": "character varying(19)"
+    },
+    {
+      "name": "SDAUTHHG",
+      "type": "character varying(200)"
+    },
+    {
+      "name": "ALLOW1HG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "ALLOW2HG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "ALLOW3HG",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "USERIDZU",
+      "type": "character varying(30)"
+    },
+    {
+      "name": "Filter",
+      "type": "character varying(10)"
+    }
+  ],
+  "HO": [
+    {
+      "name": "EIACODXA",
+      "type": "character varying(10)"
+    },
+    {
+      "name": "LCNTYPXB",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "CAGECDHO",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "REFNUMHO",
+      "type": "character varying(32)"
+    },
+    {
+      "name": "LSACONHO",
+      "type": "character varying(18)"
+    },
+    {
+      "name": "ALTLCNHO",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "LCNSEIHO",
+      "type": "character varying(18)"
+    },
+    {
+      "name": "ALCSEIHO",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "USERIDZU",
+      "type": "character varying(30)"
+    },
+    {
+      "name": "Filter",
+      "type": "character varying(10)"
+    }
+  ],
+  "THA": [
+    {
+      "name": "EIACODXA",
+      "type": "character varying(10)"
+    },
+    {
+      "name": "CAGECDXH",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "REFNUMHA",
+      "type": "character varying(32)"
+    },
+    {
+      "name": "KWORDTHA",
+      "type": "character varying(8)"
+    },
+    {
+      "name": "DESCRTHA",
+      "type": "character varying(255)"
+    },
+    {
+      "name": "VOCABTHA",
+      "type": "character varying(6)"
+    },
+    {
+      "name": "CSNUMTHA",
+      "type": "character varying(13)"
+    },
+    {
+      "name": "CONFGTHA",
+      "type": "character varying(9)"
+    },
+    {
+      "name": "SPECHAND",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "COMMSPEC",
+      "type": "character varying(17)"
+    },
+    {
+      "name": "PROCCODE",
+      "type": "character varying(4)"
+    },
+    {
+      "name": "FINSCODE",
+      "type": "character varying(4)"
+    },
+    {
+      "name": "GOVMCODE",
+      "type": "character varying(4)"
+    },
+    {
+      "name": "STOKGUAG",
+      "type": "character varying(7)"
+    },
+    {
+      "name": "STOKWIDT",
+      "type": "character varying(7)"
+    },
+    {
+      "name": "STOKLENG",
+      "type": "character varying(7)"
+    },
+    {
+      "name": "STOKUTMS",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "SUPRCAGE",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "SUPRREFN",
+      "type": "character varying(32)"
+    },
+    {
+      "name": "STOCKSIZ",
+      "type": "character varying(15)"
+    },
+    {
+      "name": "HEADOREN",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "SECTION",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "PARTLOW",
+      "type": "numeric(5,0)"
+    },
+    {
+      "name": "ORDRPLCY",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "ORDERQTY",
+      "type": "numeric(5,0)"
+    },
+    {
+      "name": "UIDREQRD",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "ZOID",
+      "type": "character varying(30)"
+    },
+    {
+      "name": "CUREFFDT",
+      "type": "timestamp with time zone"
+    },
+    {
+      "name": "APPLICDT",
+      "type": "timestamp with time zone"
+    },
+    {
+      "name": "KPISTADT",
+      "type": "timestamp with time zone"
+    },
+    {
+      "name": "KPIENDDT",
+      "type": "timestamp with time zone"
+    },
+    {
+      "name": "CAP1STDT",
+      "type": "timestamp with time zone"
+    },
+    {
+      "name": "CAP1ENDT",
+      "type": "timestamp with time zone"
+    },
+    {
+      "name": "CAP1QUTY",
+      "type": "numeric(4,0)"
+    },
+    {
+      "name": "CAP2STDT",
+      "type": "timestamp with time zone"
+    },
+    {
+      "name": "CAP2ENDT",
+      "type": "timestamp with time zone"
+    },
+    {
+      "name": "CAP2QUTY",
+      "type": "numeric(4,0)"
+    },
+    {
+      "name": "REVIEWTH",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "COMMENTS",
+      "type": "character varying(255)"
+    },
+    {
+      "name": "OMITCAGE",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "OMITREFN",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "LINAMTHA",
+      "type": "character varying(255)"
+    },
+    {
+      "name": "USERIDZU",
+      "type": "character varying(30)"
+    },
+    {
+      "name": "Filter",
+      "type": "character varying(10)"
+    }
+  ],
+  "THG": [
+    {
+      "name": "CAGECDXH",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "REFNUMHA",
+      "type": "character varying(32)"
+    },
+    {
+      "name": "EIACODXA",
+      "type": "character varying(10)"
+    },
+    {
+      "name": "LSACONXB",
+      "type": "character varying(18)"
+    },
+    {
+      "name": "ALTLCNXB",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "LCNTYPXB",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "CSNUMTHG",
+      "type": "character varying(13)"
+    },
+    {
+      "name": "CONFGTHG",
+      "type": "character varying(9)"
+    },
+    {
+      "name": "LONGDIST",
+      "type": "numeric(7,3)"
+    },
+    {
+      "name": "LATTDIST",
+      "type": "numeric(3,2)"
+    },
+    {
+      "name": "LOADDIST",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "CUSTCINM",
+      "type": "character varying(20)"
+    },
+    {
+      "name": "CINUMBYH",
+      "type": "character varying(19)"
+    },
+    {
+      "name": "CPCODEYH",
+      "type": "character varying(19)"
+    },
+    {
+      "name": "DIAMETYH",
+      "type": "numeric(6,1)"
+    },
+    {
+      "name": "DUTCYCYH",
+      "type": "numeric(4,2)"
+    },
+    {
+      "name": "LOGMANYH",
+      "type": "numeric(4,2)"
+    },
+    {
+      "name": "TMPMINYH",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "TMPMAXYH",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "VBRATXYH",
+      "type": "numeric(5,0)"
+    },
+    {
+      "name": "VBRATYYH",
+      "type": "numeric(5,0)"
+    },
+    {
+      "name": "VIBRAZYH",
+      "type": "numeric(5,0)"
+    },
+    {
+      "name": "PRSMINYH",
+      "type": "numeric(2,2)"
+    },
+    {
+      "name": "PRSMAXYH",
+      "type": "numeric(2,2)"
+    },
+    {
+      "name": "COGXYH",
+      "type": "numeric(5,0)"
+    },
+    {
+      "name": "COGYYH",
+      "type": "numeric(5,0)"
+    },
+    {
+      "name": "COGZYH",
+      "type": "numeric(5,0)"
+    },
+    {
+      "name": "THERMALYH",
+      "type": "numeric(6,0)"
+    },
+    {
+      "name": "POWERYH",
+      "type": "numeric(6,0)"
+    },
+    {
+      "name": "PRESSYH",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "HUMMINYH",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "HUMMAXYH",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "DYNLOXYH",
+      "type": "numeric(5,0)"
+    },
+    {
+      "name": "DYNLOYYH",
+      "type": "numeric(5,0)"
+    },
+    {
+      "name": "DYNLOZYH",
+      "type": "numeric(5,0)"
+    },
+    {
+      "name": "LOGDELYH",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "UNNUMYH",
+      "type": "character varying(4)"
+    },
+    {
+      "name": "DATSTAYH",
+      "type": "character varying(20)"
+    },
+    {
+      "name": "CVFCAOYH",
+      "type": "numeric(4,2)"
+    },
+    {
+      "name": "CVFCSOYH",
+      "type": "numeric(4,2)"
+    },
+    {
+      "name": "GNCTCDYH",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "CRRNIDYH",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "RCCOSTYH",
+      "type": "numeric(10,2)"
+    },
+    {
+      "name": "COMMENTYH",
+      "type": "text"
+    },
+    {
+      "name": "MHBFTTHG",
+      "type": "double precision"
+    },
+    {
+      "name": "SRUNITHG",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "USERIDZU",
+      "type": "character varying(30)"
+    },
+    {
+      "name": "Filter",
+      "type": "character varying(10)"
+    }
+  ],
+  "XA": [
+    {
+      "name": "EIACODXA",
+      "type": "character varying(10)"
+    },
+    {
+      "name": "LCNSTRXA",
+      "type": "character varying(18)"
+    },
+    {
+      "name": "ADDLTMXA",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "CTDLTMXA",
+      "type": "numeric(3,0)"
+    },
+    {
+      "name": "CONTNOXA",
+      "type": "character varying(19)"
+    },
+    {
+      "name": "CSREORXA",
+      "type": "numeric(4,2)"
+    },
+    {
+      "name": "CSPRRQXA",
+      "type": "numeric(4,2)"
+    },
+    {
+      "name": "DEMILCXA",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "DISCNTXA",
+      "type": "numeric(4,2)"
+    },
+    {
+      "name": "ESSALVXA",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "HLCSPCXA",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "INTBINXA",
+      "type": "numeric(4,0)"
+    },
+    {
+      "name": "INCATCXA",
+      "type": "numeric(4,0)"
+    },
+    {
+      "name": "INTRATXA",
+      "type": "numeric(3,2)"
+    },
+    {
+      "name": "INVSTGXA",
+      "type": "numeric(4,2)"
+    },
+    {
+      "name": "LODFACXA",
+      "type": "numeric(3,2)"
+    },
+    {
+      "name": "WSOPLVXA",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "OPRLIFXA",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "PRSTOVXA",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "PRSTOMXA",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "PROFACXA",
+      "type": "numeric(3,2)"
+    },
+    {
+      "name": "RCBINCXA",
+      "type": "numeric(4,0)"
+    },
+    {
+      "name": "RCCATCXA",
+      "type": "numeric(4,0)"
+    },
+    {
+      "name": "RESTCRXA",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "SAFLVLXA",
+      "type": "numeric(2,0)"
+    },
+    {
+      "name": "SECSFCXA",
+      "type": "numeric(3,2)"
+    },
+    {
+      "name": "TRNCSTXA",
+      "type": "numeric(5,2)"
+    },
+    {
+      "name": "WSTYAQXA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "TSSCODXA",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "DMCCCDXA",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "IBCCCDXA",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "ICCCCDXA",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "ISSCCCXA",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "RBCCCDXA",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "RCCCCDXA",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "TRNCCCXA",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "EICCCDXA",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "USERIDZU",
+      "type": "character varying(30)"
+    },
+    {
+      "name": "Filter",
+      "type": "character varying(10)"
+    }
+  ],
+  "XB": [
+    {
+      "name": "EIACODXA",
+      "type": "character varying(10)"
+    },
+    {
+      "name": "LSACONXB",
+      "type": "character varying(18)"
+    },
+    {
+      "name": "ALTLCNXB",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "LCNTYPXB",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "LCNINDXB",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "LCNAMEXB",
+      "type": "text"
+    },
+    {
+      "name": "TMFGCDXB",
+      "type": "character varying(11)"
+    },
+    {
+      "name": "SYSIDNXB",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "SECITMXB",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "RAMINDXB",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "LDOILSXB",
+      "type": "character varying(200)"
+    },
+    {
+      "name": "LDOENGXB",
+      "type": "character varying(200)"
+    },
+    {
+      "name": "WIBBLEXB",
+      "type": "character varying(9)"
+    },
+    {
+      "name": "SWIDCDXB",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "DISCODXB",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "LOCWAZXB",
+      "type": "character varying(10)"
+    },
+    {
+      "name": "DMCSDCXB",
+      "type": "character varying(4)"
+    },
+    {
+      "name": "DMCDCVXB",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "BDEESSXB",
+      "type": "numeric(1,0)"
+    },
+    {
+      "name": "ELETYPXB",
+      "type": "character varying(30)"
+    },
+    {
+      "name": "USERIDZU",
+      "type": "character varying(30)"
+    },
+    {
+      "name": "Filter",
+      "type": "character varying(10)"
+    }
+  ],
+  "XC": [
+    {
+      "name": "EIACODXA",
+      "type": "character varying(10)"
+    },
+    {
+      "name": "LSACONXB",
+      "type": "character varying(18)"
+    },
+    {
+      "name": "ALTLCNXB",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "LCNTYPXB",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "UOCSEIXC",
+      "type": "character varying(4)"
+    },
+    {
+      "name": "PCCNUMXC",
+      "type": "character varying(6)"
+    },
+    {
+      "name": "ITMDESXC",
+      "type": "character varying(26)"
+    },
+    {
+      "name": "PLISNOXC",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "TOCCODXC",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "QTYASYXC",
+      "type": "character varying(4)"
+    },
+    {
+      "name": "QTYPEIXC",
+      "type": "character varying(5)"
+    },
+    {
+      "name": "TRASEIXC",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "UOCMOVXC",
+      "type": "character varying(3)"
+    },
+    {
+      "name": "RRTDRWXC",
+      "type": "character varying(36)"
+    },
+    {
+      "name": "QPEICOXC",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "USERIDZU",
+      "type": "character varying(30)"
+    },
+    {
+      "name": "Filter",
+      "type": "character varying(10)"
+    }
+  ],
+  "XF": [
+    {
+      "name": "EIACODXA",
+      "type": "character varying(10)"
+    },
+    {
+      "name": "LSACONXF",
+      "type": "character varying(18)"
+    },
+    {
+      "name": "ALTLCNXF",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "LCNTYPXF",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "LCNSEIXF",
+      "type": "character varying(18)"
+    },
+    {
+      "name": "ALCSEIXF",
+      "type": "character varying(2)"
+    },
+    {
+      "name": "LTYSEIXF",
+      "type": "character varying(1)"
+    },
+    {
+      "name": "USERIDZU",
+      "type": "character varying(30)"
+    },
+    {
+      "name": "Filter",
+      "type": "character varying(10)"
+    }
+  ]
+}

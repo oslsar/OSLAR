@@ -48,7 +48,7 @@ if docker exec \
     -e OSLAR_PREVIEW_BASE_URL=http://127.0.0.1:3000 \
     oslar-dev-web \
     node --experimental-strip-types \
-    --test ai-tests/compiler-lookup-plan.test.mjs ai-tests/compiler-validation.test.mjs; then
+    --test ai-tests/compiler-lookup-plan.test.mjs ai-tests/compiler-validation.test.mjs ai-tests/wescam-opus.test.mjs; then
     echo "  PASS  Compiler lookup-plan tests"
 else
     echo "  FAIL  Compiler lookup-plan tests"

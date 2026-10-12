@@ -59,7 +59,7 @@ for (const [entity, baseline] of Object.entries(baselines)) {
       await expect(page.locator('div.rounded-md.border.p-3')).toHaveCount(baseline.fields);
       const lookupFields = fields.filter(field => field.controlType === 'lookup');
       expect(lookupFields.map(field => field.lookup.parentEntityCode)).toEqual(baseline.lookups);
-      await expect(page.locator('select')).toHaveCount(baseline.lookups.length);
+      await expect(page.locator('section').filter({ has: page.getByRole('heading', { name: 'Generated form', exact: true }) }).locator('select')).toHaveCount(baseline.lookups.length);
 
       for (const field of fields) {
         const card = fieldCard(page, field.columnName);
@@ -236,3 +236,62 @@ for (const [entity, baseline] of Object.entries(baselines)) {
     }
   });
 }
+
+test('dependent selection clears and reloads when parent changes with identical context', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  const response = await page.request.get('/api/compiler/entities/HO/preview');
+  expect(response.status()).toBe(200);
+  const preview = await response.json();
+  const lookups = preview.gui.form.sections.flatMap(s => s.fields).filter(f => f.lookup);
+  const dependent = lookups.find(f => f.lookup.contextFilters.length > 0);
+  const upstream = lookups.find(f => f !== dependent && dependent.lookup.contextFilters.some(
+    filter => f.lookup.foreignKeyColumns.includes(filter.sourceColumn)));
+  expect(upstream).toBeTruthy();
+  const parentKey = Object.fromEntries(upstream.lookup.primaryKeyColumns.map((column, i) => [column, `v${i}`]));
+  const contextSources = dependent.lookup.contextFilters.map(f => f.sourceColumn);
+  const ownIndex = upstream.lookup.foreignKeyColumns.findIndex(c => !contextSources.includes(c));
+  expect(ownIndex).toBeGreaterThanOrEqual(0);
+  const secondKey = { ...parentKey, [upstream.lookup.primaryKeyColumns[ownIndex]]: 'different-parent' };
+  const childKey = Object.fromEntries(dependent.lookup.primaryKeyColumns.map((column, i) => {
+    const source = dependent.lookup.foreignKeyColumns[i];
+    const parentIndex = upstream.lookup.foreignKeyColumns.indexOf(source);
+    return [column, parentIndex < 0 ? `child${i}` : parentKey[upstream.lookup.primaryKeyColumns[parentIndex]]];
+  }));
+  const dependentRequests = [];
+  await page.route('**/api/**', async route => {
+    const request = route.request();
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method())) return route.abort('blockedbyclient');
+    const url = new URL(request.url());
+    if (!url.pathname.startsWith('/api/compiler/lookups/')) return route.continue();
+    const id = url.searchParams.get('relationshipId');
+    if (id === dependent.lookup.relationshipId) dependentRequests.push(url.searchParams.get('contexts'));
+    const keys = id === upstream.lookup.relationshipId ? [parentKey, secondKey] : [childKey];
+    await route.fulfill({ json: { items: keys.map((key, i) => ({ key, label: `Choice ${i}`, display: {} })) } });
+  });
+  await page.goto('/lsar/entities/HO');
+  const parentSelect = fieldCard(page, upstream.columnName).locator('select');
+  const childSelect = fieldCard(page, dependent.columnName).locator('select');
+  await expect(parentSelect.locator('option')).toHaveCount(3);
+  await parentSelect.selectOption(JSON.stringify(parentKey));
+  await expect(childSelect.locator('option')).toHaveCount(2);
+  await childSelect.selectOption(JSON.stringify(childKey));
+  await expect(childSelect).toHaveValue(JSON.stringify(childKey));
+  // Allow the selection-triggered reload to complete before measuring the next one.
+  await expect.poll(() => dependentRequests.length).toBeGreaterThanOrEqual(2);
+  await expect(childSelect.locator('option')).toHaveCount(2);
+  const before = dependentRequests.length;
+  await parentSelect.selectOption(JSON.stringify(secondKey));
+  await expect(childSelect).toHaveValue('');
+  for (let i = 0; i < dependent.lookup.foreignKeyColumns.length; i++) {
+    const column = dependent.lookup.foreignKeyColumns[i];
+    if (!upstream.lookup.foreignKeyColumns.includes(column) && column !== dependent.columnName) {
+      await expect(fieldCard(page, column).locator('input:not([type="search"])')).toHaveValue('');
+    }
+  }
+  await expect.poll(() => dependentRequests.length).toBeGreaterThan(before);
+  const expectedContexts = Object.fromEntries(contextSources.map(column => [column,
+    parentKey[upstream.lookup.primaryKeyColumns[upstream.lookup.foreignKeyColumns.indexOf(column)]] ]));
+  expect(JSON.parse(dependentRequests.at(-1))).toEqual(expectedContexts);
+  expect(errors).toEqual([]);
+});
