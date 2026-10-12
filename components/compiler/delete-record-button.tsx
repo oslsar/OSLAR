@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type DeleteRecordButtonProps = {
@@ -63,6 +63,7 @@ export default function DeleteRecordButton({
         return;
       }
 
+      window.dispatchEvent(new CustomEvent("compiler-record-deleted", { detail: entityCode }));
       router.refresh();
     } catch (deleteError) {
       console.error(
@@ -94,4 +95,17 @@ export default function DeleteRecordButton({
       )}
     </div>
   );
+}
+
+
+export function DeleteFeedback({ entityCode }: { entityCode: string }) {
+  const [message, setMessage] = useState<string | null>(null);
+  useEffect(() => {
+    function deleted(event: Event) {
+      if ((event as CustomEvent<string>).detail === entityCode) setMessage("Record deleted.");
+    }
+    window.addEventListener("compiler-record-deleted", deleted);
+    return () => window.removeEventListener("compiler-record-deleted", deleted);
+  }, [entityCode]);
+  return message ? <p role="status" className="mt-3 text-sm text-green-700">{message}</p> : null;
 }

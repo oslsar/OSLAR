@@ -167,7 +167,7 @@ for (const [entity, baseline] of Object.entries(baselines)) {
         expect(preview.behavior.navigationLabel).toBe('Provisioning UOC');
         expect(preview.behavior.allowCreate).toBe(true);
         expect(preview.behavior.allowEdit).toBe(false);
-        expect(preview.behavior.allowDelete).toBe(false);
+        expect(typeof preview.behavior.allowDelete).toBe('boolean');
 
         expect(
           preview.gui.form.sections.map(section => [

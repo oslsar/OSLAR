@@ -43,15 +43,15 @@ else
 fi
 
 echo
-echo "[4/5] Compiler lookup-plan tests"
+echo "[4/5] Compiler tests"
 if docker exec \
     -e OSLAR_PREVIEW_BASE_URL=http://127.0.0.1:3000 \
     oslar-dev-web \
     node --experimental-strip-types \
-    --test ai-tests/compiler-lookup-plan.test.mjs; then
-    echo "  PASS  Compiler lookup-plan tests"
+    --test ai-tests/compiler-lookup-plan.test.mjs ai-tests/compiler-delete.test.mjs ai-tests/baseline-delete-migration.test.mjs; then
+    echo "  PASS  Compiler tests"
 else
-    echo "  FAIL  Compiler lookup-plan tests"
+    echo "  FAIL  Compiler tests"
     FAIL=1
 fi
 

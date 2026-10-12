@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { buildEntityPreview } from "@/lib/compiler/preview";
 import { getEntityRows } from "@/lib/compiler/data";
 import GeneratedForm from "@/components/compiler/generated-form";
-import DeleteRecordButton from "@/components/compiler/delete-record-button";
+import DeleteRecordButton, { DeleteFeedback } from "@/components/compiler/delete-record-button";
 
 export const dynamic = "force-dynamic";
 
@@ -101,6 +101,8 @@ export default async function EntityPage({
         <p className="mt-2 text-xs text-gray-500">
           Showing up to {data.limit} read-only records.
         </p>
+
+        <DeleteFeedback key={preview.entity.entityCode} entityCode={preview.entity.entityCode} />
 
         <div className="mt-4 overflow-x-auto rounded-lg border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
